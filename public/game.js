@@ -1338,7 +1338,7 @@ function buildShareMessage() {
         }
 
         const visualization = rows.join('\n');
-        return `i found ${score} word${score === 1 ? '' : 's'} lurking in shadowgram #${puzzleNum}\n\n${visualization}`;
+        return `i found ${score} word${score === 1 ? '' : 's'} lurking in shadowgram #${puzzleNum}\n\n${visualization}\n\nwww.shadowgrams.xyz`;
     } catch (e) {
         console.error('Error building share message:', e);
         return null;

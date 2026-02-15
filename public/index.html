@@ -4,17 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shadowgrams</title>
+    <link rel="icon" href="assets/favicon.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
     <script>
         (function() {
-            var hostname = window.location.hostname || '';
-            var isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname.endsWith('.local');
-            if (isLocalhost) {
-                return;
-            }
+            try {
+                var hostname = window.location.hostname || '';
+                var isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname.endsWith('.local');
+                if (isLocalhost) {
+                    return;
+                }
 
-            !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]);var n=t[e];t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0))),n&&n.apply(t,arguments)}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once people.unset people.increment people.append people.remove people.group identify_group group set_group add_group remove_group get_groups reset debug get_property get_distinct_id on ready opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing startSessionRecording stopSessionRecording isSessionRecordingRunning enableRecording disableRecording getActiveFeatureFlags isFeatureEnabled onFeatureFlags reloadFeatureFlags").split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-            posthog.init('phc_5VznCURI70V8s1PQjxHCFMC8F2p5WgAVnVSRlf91KcO',{api_host:'https://app.posthog.com',autocapture:true,capture_pageview:true});
+                var posthog = window.posthog || [];
+                var methods = [
+                    'capture', 'identify', 'alias', 'people.set', 'people.set_once', 'people.unset',
+                    'people.increment', 'people.append', 'people.remove', 'group', 'identify_group',
+                    'set_group', 'add_group', 'remove_group', 'get_groups', 'reset', 'debug',
+                    'get_property', 'get_distinct_id', 'on', 'ready', 'opt_in_capturing',
+                    'opt_out_capturing', 'has_opted_in_capturing', 'has_opted_out_capturing',
+                    'clear_opt_in_out_capturing', 'startSessionRecording', 'stopSessionRecording',
+                    'isSessionRecordingRunning', 'enableRecording', 'disableRecording',
+                    'getActiveFeatureFlags', 'isFeatureEnabled', 'onFeatureFlags', 'reloadFeatureFlags'
+                ];
+
+                function stub(method) {
+                    var parts = method.split('.');
+                    var target = posthog;
+                    if (parts.length === 2) {
+                        target = posthog[parts[0]] = posthog[parts[0]] || [];
+                        method = parts[1];
+                    }
+                    target[method] = function() {
+                        target.push([method].concat([].slice.call(arguments, 0)));
+                    };
+                }
+
+                for (var i = 0; i < methods.length; i++) {
+                    stub(methods[i]);
+                }
+
+                posthog.init = function(apiKey, config) {
+                    posthog.push(['init', apiKey, config]);
+                };
+
+                window.posthog = posthog;
+
+                var script = document.createElement('script');
+                script.async = true;
+                script.src = 'https://app.posthog.com/static/array.js';
+                script.onload = function() {
+                    if (window.posthog && typeof window.posthog.init === 'function') {
+                        window.posthog.init('phc_5VznCURI70V8s1PQjxHCFMC8F2p5WgAVnVSRlf91KcO', {
+                            api_host: 'https://app.posthog.com',
+                            autocapture: true,
+                            capture_pageview: true
+                        });
+                    }
+                };
+                document.head.appendChild(script);
+            } catch (e) {
+                // Fail silently if tracking is blocked.
+            }
         })();
     </script>
 </head>
@@ -82,7 +132,7 @@
     <!-- Best Level Modal -->
     <div id="bestModal" class="best-modal">
         <div class="best-modal-content">
-            <img src="assets/high-five.svg" alt="Trophy" class="best-modal-image">
+            <img src="assets/high-five.svg" alt="High five!" class="best-modal-image">
             <p class="best-modal-text">nice!</p>
             <p class="best-modal-text">you found <span id="bestModalCount">0</span> word<span id="bestModalPlural">s</span>.</p>
             <p class="best-modal-text">that makes you (one of) the best.</p>
