@@ -1497,10 +1497,20 @@ function updateIndicators() {
     // Show/hide persistent share button based on best threshold
     const persistentShareBtn = document.getElementById('persistentShareBtn');
     if (persistentShareBtn) {
+        const bestModal = document.getElementById('bestModal');
+        const bestModalOpen = bestModal && bestModal.classList.contains('open');
         if (score >= bestThreshold) {
             persistentShareBtn.style.display = 'flex';
+            // If modal is open, hide the button (should be handled in showBestModal)
+            if (bestModalOpen) {
+                persistentShareBtn.style.display = 'none';
+            } else {
+                // Remove fade-in if present (only fade in once after modal closes)
+                persistentShareBtn.classList.remove('fade-in');
+            }
         } else {
             persistentShareBtn.style.display = 'none';
+            persistentShareBtn.classList.remove('fade-in');
         }
     }
     
@@ -1606,9 +1616,12 @@ function hideBestModal() {
     // Fade in persistent share button when modal dismissed
     if (persistentShareBtn) {
         persistentShareBtn.style.display = 'flex';
-        // Trigger reflow to ensure CSS transition plays
-        persistentShareBtn.offsetHeight;
-        persistentShareBtn.classList.add('fade-in');
+        // Only add fade-in if not already visible (and not already faded in)
+        if (!persistentShareBtn.classList.contains('fade-in')) {
+            // Trigger reflow to ensure CSS transition plays
+            persistentShareBtn.offsetHeight;
+            persistentShareBtn.classList.add('fade-in');
+        }
     }
     
     refocusMobileInput();

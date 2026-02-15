@@ -513,6 +513,11 @@ button:active {
     transition: transform 0.2s ease, background 0.2s ease;
     padding: 0;
     opacity: 0;
+    /* When visible and not fading in, set opacity: 1 */
+}
+
+.persistent-share-btn[style*="display: flex"]:not(.fade-in) {
+    opacity: 1 !important;
 }
 
 .persistent-share-btn.fade-in {
