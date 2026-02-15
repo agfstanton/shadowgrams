@@ -585,12 +585,13 @@ function updateTileFontSize() {
  */
 function updateTileGap() {
     const tilesDisplay = document.querySelector('.tiles-display');
-    const firstTileImg = tilesDisplay?.querySelector('.tile img');
-    
-    if (!firstTileImg) return;
+    if (!tilesDisplay) return;
     
     // Function to update the gap
     const updateGap = () => {
+        const firstTileImg = tilesDisplay.querySelector('.tile img');
+        if (!firstTileImg) return;
+        
         const actualHeight = firstTileImg.offsetHeight;
         if (actualHeight > 0) {
             const gap = actualHeight / 39;
@@ -607,12 +608,28 @@ function updateTileGap() {
         }
     };
     
-    // Wait for image to load if not already loaded
-    if (!firstTileImg.complete) {
-        firstTileImg.addEventListener('load', updateGap, { once: true });
+    // Wait for all tile images to load before calculating
+    const images = tilesDisplay.querySelectorAll('img');
+    let loadedCount = 0;
+    
+    const checkAllLoaded = () => {
+        loadedCount++;
+        if (loadedCount === images.length) {
+            // Add extra delay to ensure layout is fully settled
+            setTimeout(updateGap, 50);
+        }
+    };
+    
+    if (images.length === 0) {
+        setTimeout(updateGap, 50);
     } else {
-        // Use setTimeout to ensure DOM has updated
-        setTimeout(updateGap, 0);
+        images.forEach(img => {
+            if (img.complete) {
+                checkAllLoaded();
+            } else {
+                img.addEventListener('load', checkAllLoaded, { once: true });
+            }
+        });
     }
 }
 
