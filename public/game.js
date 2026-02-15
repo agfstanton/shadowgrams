@@ -537,6 +537,47 @@ function renderTiles() {
     
     // Update responsive gap after tiles render
     updateTileGap();
+    updateTileFontSize();
+}
+
+/**
+ * Update tile font size based on tiles-display height
+ */
+function updateTileFontSize() {
+    const tilesDisplay = document.querySelector('.tiles-display');
+    if (!tilesDisplay) return;
+    
+    const updateSize = () => {
+        const displayHeight = tilesDisplay.offsetHeight;
+        if (displayHeight > 0) {
+            const fontSize = displayHeight * 0.75;
+            document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
+        }
+    };
+    
+    // Wait for all tile images to load before calculating
+    const images = tilesDisplay.querySelectorAll('img');
+    let loadedCount = 0;
+    
+    const checkAllLoaded = () => {
+        loadedCount++;
+        if (loadedCount === images.length) {
+            // Add extra delay to ensure layout is fully settled
+            setTimeout(updateSize, 50);
+        }
+    };
+    
+    if (images.length === 0) {
+        setTimeout(updateSize, 50);
+    } else {
+        images.forEach(img => {
+            if (img.complete) {
+                checkAllLoaded();
+            } else {
+                img.addEventListener('load', checkAllLoaded, { once: true });
+            }
+        });
+    }
 }
 
 /**
@@ -769,6 +810,7 @@ async function init() {
     
     // Update tile gap on window resize
     window.addEventListener('resize', updateTileGap);
+    window.addEventListener('resize', updateTileFontSize);
 }
 
 function setupMobileInput() {

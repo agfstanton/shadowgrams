@@ -250,6 +250,8 @@ body {
     position: relative;
     transition: filter 0.2s ease;
 }
+    transition: filter 0.2s ease;
+}
 
 .tile.incorrect {
     animation: flash-red 0.5s ease;
@@ -278,7 +280,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -56%);
-    font-size: calc(120px * 0.75);
+    font-size: var(--tile-font-size, 90px);
     font-weight: 500;
     color: var(--color-white);
     font-family: 'Sono', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
@@ -560,6 +562,7 @@ button:active {
     column-gap: 8px;
     row-gap: -1px;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 0;
     border-radius: 0;
     flex-grow: 1;
