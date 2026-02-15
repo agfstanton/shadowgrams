@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shadowgrams</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="logo-container">
+        <img src="assets/shadowgrams.svg" alt="Shadowgrams" class="logo">
+        <button id="infoBtn" class="info-icon" title="How to Play">
+            <img src="icons/question_mark.svg" alt="Info" class="icon-svg">
+        </button>
+    </div>
+    
+    <div class="game-container">
+        <div class="tiles-wrap">
+            <div class="puzzle-header">
+                <div class="puzzle-number" id="puzzleNumber">shadowgram #1</div>
+                <div class="puzzle-date" id="puzzleDate"></div>
+            </div>
+            
+            <div class="tiles-display">
+                <!-- Tiles will be dynamically rendered by JavaScript -->
+            </div>
+            
+            <!-- Hidden input for mobile keyboard -->
+            <input type="text" id="mobileInput" class="mobile-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+            
+            <div class="error-message-space">
+                <div class="error-message-display" id="error-message-display"></div>
+            </div>
+            
+            <div class="buttons-message-row">
+                <div class="buttons-row">
+                    <button id="clearBtn" class="puzzle-btn clear-btn" title="Clear">
+                        clear
+                        <img src="icons/backspace.svg" alt="" class="icon-svg" aria-hidden="true">
+                    </button>
+                    <button id="submitBtn" class="puzzle-btn submit-btn" title="Enter">
+                        enter
+                        <img src="icons/keyboard_return.svg" alt="" class="icon-svg" aria-hidden="true">
+                    </button>
+                    <button id="shareBtn" class="puzzle-btn share-btn" title="Share">share</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="found-words">
+            <div class="words-container">
+                <div class="score-header">
+                    <div class="score-circle">
+                        <span id="score">0</span>
+                    </div>
+                    <div class="score-info">
+                        <div class="words-found-label">words found</div>
+                        <div class="next-level-text"><span id="next-level-count">30</span> to <span id="next-level-name" class="next-level-name">yellow</span></div>
+                    </div>
+                </div>
+                
+                <div class="words-grid" id="wordsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Best Level Modal -->
+    <div id="bestModal" class="best-modal">
+        <div class="best-modal-content">
+            <img src="assets/high-five.svg" alt="Trophy" class="best-modal-image">
+            <p class="best-modal-text">nice!</p>
+            <p class="best-modal-text">you found <span id="bestModalCount">0</span> word<span id="bestModalPlural">s</span>.</p>
+            <p class="best-modal-text">that makes you (one of) the best.</p>
+            <div class="best-modal-actions">
+                <button id="bestShareBtn" class="puzzle-btn best-share-btn">brag about it</button>
+                <button id="bestKeepPlayingBtn" class="puzzle-btn best-keep-btn">keep playing</button>
+            </div>
+            <p id="bestShareStatus" class="best-share-status"></p>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <h2>How to Play</h2>
+            <h3>Find words that share a shadow</h3>
+            <ul class="how-to-play">
+                <li>Words must fit the shape of the shadow</li>
+                <li>Only lowercase characters are used</li>
+                <li>Letters can be used more than once</li>
+                <li>Proper nouns do not count ☹</li>
+                <li>Improper nouns (and profane words) do count ☺</li>
+            </ul>
+            <div class="tile-legend">
+                <div class="legend-container">
+                    <div class="legend-row">
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">a</span></div>
+                        <div class="legend-letter"><img src="assets/Tile1.svg" alt="Tile 1" class="legend-tile-bg"><span class="legend-letter-text">b</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">c</span></div>
+                        <div class="legend-letter"><img src="assets/Tile1.svg" alt="Tile 1" class="legend-tile-bg"><span class="legend-letter-text">d</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">e</span></div>
+                        <div class="legend-letter"><img src="assets/Tile1.svg" alt="Tile 1" class="legend-tile-bg"><span class="legend-letter-text">f</span></div>
+                        <div class="legend-letter"><img src="assets/Tile3.svg" alt="Tile 3" class="legend-tile-bg"><span class="legend-letter-text">g</span></div>
+                        <div class="legend-letter"><img src="assets/Tile1.svg" alt="Tile 1" class="legend-tile-bg"><span class="legend-letter-text">h</span></div>
+                        <div class="legend-letter"><img src="assets/Tile1.svg" alt="Tile 1" class="legend-tile-bg"><span class="legend-letter-text">i</span></div>
+                        <div class="legend-letter"><img src="assets/Tile4.svg" alt="Tile 4" class="legend-tile-bg"><span class="legend-letter-text">j</span></div>
+                        <div class="legend-letter"><img src="assets/Tile1.svg" alt="Tile 1" class="legend-tile-bg"><span class="legend-letter-text">k</span></div>
+                        <div class="legend-letter"><img src="assets/Tile1.svg" alt="Tile 1" class="legend-tile-bg"><span class="legend-letter-text">l</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">m</span></div>
+                    </div>
+                    <div class="legend-row">
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">n</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">o</span></div>
+                        <div class="legend-letter"><img src="assets/Tile3.svg" alt="Tile 3" class="legend-tile-bg"><span class="legend-letter-text">p</span></div>
+                        <div class="legend-letter"><img src="assets/Tile3.svg" alt="Tile 3" class="legend-tile-bg"><span class="legend-letter-text">q</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">r</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">s</span></div>
+                        <div class="legend-letter"><img src="assets/Tile1.svg" alt="Tile 1" class="legend-tile-bg"><span class="legend-letter-text">t</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">u</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">v</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">w</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">x</span></div>
+                        <div class="legend-letter"><img src="assets/Tile3.svg" alt="Tile 3" class="legend-tile-bg"><span class="legend-letter-text">y</span></div>
+                        <div class="legend-letter"><img src="assets/Tile2.svg" alt="Tile 2" class="legend-tile-bg"><span class="legend-letter-text">z</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div>&copy; <span id="copyrightYear"></span> audrey stanton</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
