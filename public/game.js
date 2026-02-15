@@ -43,6 +43,16 @@ let inactivityTimeoutId = null;
 let lastActivityTime = Date.now();
 let bestModalShown = false;
 
+function trackEvent(eventName, properties) {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    if (window.posthog && typeof window.posthog.capture === 'function') {
+        window.posthog.capture(eventName, properties || {});
+    }
+}
+
 /**
  * Save found words to localStorage for today's date
  */
@@ -242,6 +252,7 @@ async function loadWordlist() {
                         pattern: todayPattern,
                         date: todayDateStr,
                         puzzleIndex: apiData.puzzleIndex,
+                        puzzleNumber: apiData.puzzleIndex,
                         wordCount: wordCount,
                         thresholds: thresholds
                     })); 
@@ -435,6 +446,11 @@ function handleKeyDown(e) {
 
     if (e.key === 'Enter') {
         e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.classList.add('active');
+            setTimeout(() => submitBtn.classList.remove('active'), 100);
+        }
         submitWord();
         return;
     }
@@ -523,10 +539,11 @@ function renderTiles() {
         const img = document.createElement('img');
         const src = `assets/Tile${tileNum}.svg`;
         img.src = src;
+        img.width = 115;
+        img.height = 195;
         tileOriginalSrcs.push(src); // Store original source
         getRecoloredSVG(src);
         img.alt = `Tile ${tileNum}`;
-        img.loading = 'lazy';
         tile.appendChild(img);
         const char = document.createElement('span');
         char.className = 'tile-char';
@@ -535,40 +552,60 @@ function renderTiles() {
         tilesDisplay.appendChild(tile);
     });
     
-    // Update responsive gap after tiles render
-    updateTileGap();
-    updateTileFontSize();
+    // Wait for all images to load, then update gap and font size, then show container
+    waitForImagesAndShowContainer();
 }
 
 /**
- * Update tile font size based on tiles-display height
+ * Wait for all tile images to load, calculate sizes, then make container visible
  */
-function updateTileFontSize() {
+function waitForImagesAndShowContainer() {
     const tilesDisplay = document.querySelector('.tiles-display');
-    if (!tilesDisplay) return;
+    const gameContainer = document.querySelector('.game-container');
+    if (!tilesDisplay || !gameContainer) return;
     
-    const updateSize = () => {
-        const displayHeight = tilesDisplay.offsetHeight;
-        if (displayHeight > 0) {
-            const fontSize = displayHeight * 0.75;
-            document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
-        }
-    };
-    
-    // Wait for all tile images to load before calculating
     const images = tilesDisplay.querySelectorAll('img');
     let loadedCount = 0;
+    
+    const onAllImagesLoaded = () => {
+        // Add delay to ensure layout is fully settled
+        setTimeout(() => {
+            // Update calculations
+            const firstTileImg = tilesDisplay.querySelector('.tile img');
+            if (firstTileImg && firstTileImg.offsetHeight > 0) {
+                const gap = firstTileImg.offsetHeight / 39;
+                document.documentElement.style.setProperty('--tile-gap', `${gap}px`);
+            }
+
+            const firstLegendTile = document.querySelector('.legend-letter');
+            if (firstLegendTile) {
+                const legendHeight = firstLegendTile.getBoundingClientRect().height;
+                if (legendHeight > 0) {
+                    const legendGap = legendHeight / 39;
+                    document.documentElement.style.setProperty('--legend-gap', `${legendGap}px`);
+                }
+            }
+
+            const displayHeight = tilesDisplay.offsetHeight;
+            if (displayHeight > 0) {
+                const fontSize = displayHeight * 0.75;
+                document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
+            }
+            
+            // Now make container visible
+            gameContainer.style.opacity = '1';
+        }, 50);
+    };
     
     const checkAllLoaded = () => {
         loadedCount++;
         if (loadedCount === images.length) {
-            // Add extra delay to ensure layout is fully settled
-            setTimeout(updateSize, 50);
+            onAllImagesLoaded();
         }
     };
     
     if (images.length === 0) {
-        setTimeout(updateSize, 50);
+        onAllImagesLoaded();
     } else {
         images.forEach(img => {
             if (img.complete) {
@@ -581,38 +618,42 @@ function updateTileFontSize() {
 }
 
 /**
- * Update tile gap based on actual rendered tile height
+ * Update tile font size based on tiles-display height (for window resize events)
+ */
+function updateTileFontSize() {
+    const tilesDisplay = document.querySelector('.tiles-display');
+    if (!tilesDisplay) return;
+    
+    const displayHeight = tilesDisplay.offsetHeight;
+    if (displayHeight > 0) {
+        const fontSize = displayHeight * 0.75;
+        document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
+    }
+}
+
+/**
+ * Update tile gap based on actual rendered tile height (for window resize events)
  */
 function updateTileGap() {
     const tilesDisplay = document.querySelector('.tiles-display');
-    const firstTileImg = tilesDisplay?.querySelector('.tile img');
+    if (!tilesDisplay) return;
     
+    const firstTileImg = tilesDisplay.querySelector('.tile img');
     if (!firstTileImg) return;
     
-    // Function to update the gap
-    const updateGap = () => {
-        const actualHeight = firstTileImg.offsetHeight;
-        if (actualHeight > 0) {
-            const gap = actualHeight / 39;
-            document.documentElement.style.setProperty('--tile-gap', `${gap}px`);
-        }
+    const actualHeight = firstTileImg.offsetHeight;
+    if (actualHeight > 0) {
+        const gap = actualHeight / 39;
+        document.documentElement.style.setProperty('--tile-gap', `${gap}px`);
+    }
 
-        const firstLegendTile = document.querySelector('.legend-letter');
-        if (firstLegendTile) {
-            const legendHeight = firstLegendTile.getBoundingClientRect().height;
-            if (legendHeight > 0) {
-                const legendGap = legendHeight / 39;
-                document.documentElement.style.setProperty('--legend-gap', `${legendGap}px`);
-            }
+    const firstLegendTile = document.querySelector('.legend-letter');
+    if (firstLegendTile) {
+        const legendHeight = firstLegendTile.getBoundingClientRect().height;
+        if (legendHeight > 0) {
+            const legendGap = legendHeight / 39;
+            document.documentElement.style.setProperty('--legend-gap', `${legendGap}px`);
         }
-    };
-    
-    // Wait for image to load if not already loaded
-    if (!firstTileImg.complete) {
-        firstTileImg.addEventListener('load', updateGap, { once: true });
-    } else {
-        // Use setTimeout to ensure DOM has updated
-        setTimeout(updateGap, 0);
     }
 }
 
@@ -651,14 +692,8 @@ function displayPuzzleNumber() {
 }
 
 async function init() {
-    // Render tiles for current pattern
-    renderTiles();
-    
     // Display current date in Central time
     displayCentralDate();
-    
-    // Display puzzle number
-    displayPuzzleNumber();
     
     // Set copyright year
     const yearEl = document.getElementById('copyrightYear');
@@ -671,6 +706,9 @@ async function init() {
     if (!loaded) {
         return;
     }
+    
+    // Display puzzle number (after puzzle data is loaded)
+    displayPuzzleNumber();
     
     // Initialize best modal state for today (after puzzle data loads)
     // Only set from localStorage if not already shown this session
@@ -696,6 +734,10 @@ async function init() {
             invalidPositions.clear();
             updateTypedDisplay();
             refocusMobileInput();
+            trackEvent('clear_clicked', {
+                puzzle_number: getCurrentPuzzleNumber(),
+                pattern_length: CURRENT_PATTERN.length
+            });
         });
     }
 
@@ -703,6 +745,32 @@ async function init() {
     const shareBtn = document.getElementById('shareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', shareResults);
+    }
+    
+    // persistent share button click
+    const persistentShareBtn = document.getElementById('persistentShareBtn');
+    if (persistentShareBtn) {
+        persistentShareBtn.addEventListener('click', () => {
+            // Only show visual feedback on desktop (not touch devices)
+            const isDesktop = !('ontouchstart' in window) && !navigator.maxTouchPoints;
+            
+            if (isDesktop) {
+                const icon = persistentShareBtn.querySelector('.icon-svg');
+                const originalSrc = icon.src;
+                
+                // Change to copy icon and add glow
+                icon.src = 'icons/content_copy.svg';
+                persistentShareBtn.classList.add('copied');
+                
+                // Revert after 1 second
+                setTimeout(() => {
+                    icon.src = originalSrc;
+                    persistentShareBtn.classList.remove('copied');
+                }, 1000);
+            }
+            
+            shareResults();
+        });
     }
 
     // Best modal handling
@@ -755,6 +823,10 @@ async function init() {
                 if (copyright) copyright.classList.add('white');
                 infoBtn.classList.add('white');
                 infoIcon.src = 'icons/close.svg';
+                trackEvent('info_opened', {
+                    puzzle_number: getCurrentPuzzleNumber(),
+                    pattern_length: CURRENT_PATTERN.length
+                });
             }
         });
     }
@@ -925,6 +997,12 @@ function submitWord() {
 
     const filledCount = typedChars.filter((ch) => ch).length;
     if (filledCount < CURRENT_PATTERN.length) {
+        trackEvent('word_submitted', {
+            result: 'too_short',
+            filled_count: filledCount,
+            pattern_length: CURRENT_PATTERN.length,
+            puzzle_number: getCurrentPuzzleNumber()
+        });
         showMessage(`enter a ${CURRENT_PATTERN.length}-letter word!`, 'error-yellow');
         invalidPositions.clear();
         updateTypedDisplay();
@@ -938,6 +1016,11 @@ function submitWord() {
     }
 
     if (foundWords.has(word)) {
+        trackEvent('word_submitted', {
+            result: 'duplicate',
+            pattern_length: CURRENT_PATTERN.length,
+            puzzle_number: getCurrentPuzzleNumber()
+        });
         showMessage('already found', 'error-yellow');
         invalidPositions.clear();
         updateTypedDisplay();
@@ -954,6 +1037,11 @@ function submitWord() {
     const patternMatches = matchesPattern(word, CURRENT_PATTERN);
 
     if (!patternMatches) {
+        trackEvent('word_submitted', {
+            result: 'invalid_pattern',
+            pattern_length: CURRENT_PATTERN.length,
+            puzzle_number: getCurrentPuzzleNumber()
+        });
         showMessage('doesn\'t fit shadow', 'error-red');
         invalidPositions.clear();
         updateTypedDisplay();
@@ -977,6 +1065,13 @@ function submitWord() {
         addWordToGrid(word);
         saveFoundWords();
         showPlusOneMessage();
+
+        trackEvent('word_submitted', {
+            result: 'accepted',
+            pattern_length: CURRENT_PATTERN.length,
+            puzzle_number: getCurrentPuzzleNumber(),
+            score: score
+        });
         
         // Log this successful submission
         logPuzzleInteraction();
@@ -990,6 +1085,11 @@ function submitWord() {
             refocusMobileInput();
         }, 100);
     } else {
+        trackEvent('word_submitted', {
+            result: 'not_in_list',
+            pattern_length: CURRENT_PATTERN.length,
+            puzzle_number: getCurrentPuzzleNumber()
+        });
         showMessage('not in word list', 'error-red');
         invalidPositions.clear();
         updateTypedDisplay();
@@ -1139,6 +1239,12 @@ function markTypeToBeginCompleted() {
 
 function shareResults() {
     try {
+        trackEvent('share_initiated', {
+            context: 'main',
+            puzzle_number: getCurrentPuzzleNumber(),
+            pattern_length: CURRENT_PATTERN.length,
+            score: score
+        });
         const shareMessage = buildShareMessage();
         if (!shareMessage) {
             showMessage('failed to share', 'error');
@@ -1148,14 +1254,14 @@ function shareResults() {
         tryNativeShare(shareMessage).then((shared) => {
             if (shared) {
                 showMessage('shared!', 'success');
-                return;
+            } else {
+                // Only try clipboard if native share didn't work
+                copyToClipboard(shareMessage).then(() => {
+                    showMessage('copied to clipboard!', 'success');
+                }).catch(() => {
+                    showMessage('failed to copy', 'error');
+                });
             }
-
-            copyToClipboard(shareMessage).then(() => {
-                showMessage('copied to clipboard!', 'success');
-            }).catch(() => {
-                showMessage('failed to copy', 'error');
-            });
         });
     } catch(e) {
         console.error('Error sharing results:', e);
@@ -1164,6 +1270,12 @@ function shareResults() {
 }
 
 function shareFromBestModal(btnEl) {
+    trackEvent('share_initiated', {
+        context: 'best_modal',
+        puzzle_number: getCurrentPuzzleNumber(),
+        pattern_length: CURRENT_PATTERN.length,
+        score: score
+    });
     const shareMessage = buildShareMessage();
     if (!shareMessage) {
         if (btnEl) btnEl.textContent = 'failed to share';
@@ -1186,7 +1298,7 @@ function shareFromBestModal(btnEl) {
 
         copyToClipboard(shareMessage).then(() => {
             if (btnEl) {
-                btnEl.innerHTML = '<span class="material-symbols-outlined">content_copy</span><span>copied!</span>';
+                btnEl.innerHTML = '<img src="icons/content_copy.svg" alt="" class="icon-svg" aria-hidden="true"><span>copied!</span>';
             }
         }).catch(() => {
             if (btnEl) btnEl.textContent = 'failed to copy';
@@ -1226,7 +1338,7 @@ function buildShareMessage() {
         }
 
         const visualization = rows.join('\n');
-        return `Shadowgram #${puzzleNum}\n${visualization}\n\nI found ${score} solution${score === 1 ? '' : 's'}. Can you beat me?\n\n——`;
+        return `i found ${score} word${score === 1 ? '' : 's'} lurking in shadowgram #${puzzleNum}\n\n${visualization}\n\nwww.shadowgrams.xyz`;
     } catch (e) {
         console.error('Error building share message:', e);
         return null;
@@ -1345,6 +1457,16 @@ function updateIndicators() {
         scoreCircle.style.background = circleColor;
     }
     
+    // Show/hide persistent share button based on best threshold
+    const persistentShareBtn = document.getElementById('persistentShareBtn');
+    if (persistentShareBtn) {
+        if (score >= bestThreshold) {
+            persistentShareBtn.style.display = 'flex';
+        } else {
+            persistentShareBtn.style.display = 'none';
+        }
+    }
+    
     // Update next level text based on achievement status
     if (score >= bestThreshold) {
         // At best level - show celebratory message
@@ -1389,6 +1511,11 @@ function showBestModal() {
         bestModal.classList.add('open');
         bestModalShown = true;
         markBestModalShown();
+        trackEvent('best_modal_shown', {
+            puzzle_number: getCurrentPuzzleNumber(),
+            pattern_length: CURRENT_PATTERN.length,
+            score: score
+        });
     }
 
     if (infoBtn) {

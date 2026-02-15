@@ -4,7 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shadowgrams</title>
+    <link rel="icon" href="assets/favicon.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
+    <script>
+        (function() {
+            try {
+                var hostname = window.location.hostname || '';
+                var isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname.endsWith('.local');
+                if (isLocalhost) {
+                    return;
+                }
+
+                var posthog = window.posthog || [];
+                var methods = [
+                    'capture', 'identify', 'alias', 'people.set', 'people.set_once', 'people.unset',
+                    'people.increment', 'people.append', 'people.remove', 'group', 'identify_group',
+                    'set_group', 'add_group', 'remove_group', 'get_groups', 'reset', 'debug',
+                    'get_property', 'get_distinct_id', 'on', 'ready', 'opt_in_capturing',
+                    'opt_out_capturing', 'has_opted_in_capturing', 'has_opted_out_capturing',
+                    'clear_opt_in_out_capturing', 'startSessionRecording', 'stopSessionRecording',
+                    'isSessionRecordingRunning', 'enableRecording', 'disableRecording',
+                    'getActiveFeatureFlags', 'isFeatureEnabled', 'onFeatureFlags', 'reloadFeatureFlags'
+                ];
+
+                function stub(method) {
+                    var parts = method.split('.');
+                    var target = posthog;
+                    if (parts.length === 2) {
+                        target = posthog[parts[0]] = posthog[parts[0]] || [];
+                        method = parts[1];
+                    }
+                    target[method] = function() {
+                        target.push([method].concat([].slice.call(arguments, 0)));
+                    };
+                }
+
+                for (var i = 0; i < methods.length; i++) {
+                    stub(methods[i]);
+                }
+
+                posthog.init = function(apiKey, config) {
+                    posthog.push(['init', apiKey, config]);
+                };
+
+                window.posthog = posthog;
+
+                var script = document.createElement('script');
+                script.async = true;
+                script.src = 'https://app.posthog.com/static/array.js';
+                script.onload = function() {
+                    if (window.posthog && typeof window.posthog.init === 'function') {
+                        window.posthog.init('phc_5VznCURI70V8s1PQjxHCFMC8F2p5WgAVnVSRlf91KcO', {
+                            api_host: 'https://app.posthog.com',
+                            autocapture: true,
+                            capture_pageview: true
+                        });
+                    }
+                };
+                document.head.appendChild(script);
+            } catch (e) {
+                // Fail silently if tracking is blocked.
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="logo-container">
@@ -36,7 +98,7 @@
                 <div class="buttons-row">
                     <button id="clearBtn" class="puzzle-btn clear-btn" title="Clear">
                         clear
-                        <img src="icons/backspace.svg" alt="" class="icon-svg" aria-hidden="true">
+                        <img src="icons/cancel_presentation.svg" alt="" class="icon-svg" aria-hidden="true">
                     </button>
                     <button id="submitBtn" class="puzzle-btn submit-btn" title="Enter">
                         enter
@@ -57,6 +119,9 @@
                         <div class="words-found-label">words found</div>
                         <div class="next-level-text"><span id="next-level-count">30</span> to <span id="next-level-name" class="next-level-name">yellow</span></div>
                     </div>
+                    <button id="persistentShareBtn" class="persistent-share-btn" title="Share" style="display: none;">
+                        <img src="icons/share.svg" alt="Share" class="icon-svg">
+                    </button>
                 </div>
                 
                 <div class="words-grid" id="wordsGrid"></div>
@@ -67,7 +132,7 @@
     <!-- Best Level Modal -->
     <div id="bestModal" class="best-modal">
         <div class="best-modal-content">
-            <img src="assets/high-five.svg" alt="Trophy" class="best-modal-image">
+            <img src="assets/high-five.svg" alt="High five!" class="best-modal-image">
             <p class="best-modal-text">nice!</p>
             <p class="best-modal-text">you found <span id="bestModalCount">0</span> word<span id="bestModalPlural">s</span>.</p>
             <p class="best-modal-text">that makes you (one of) the best.</p>
@@ -83,9 +148,9 @@
     <div id="infoModal" class="modal">
         <div class="modal-content">
             <h2>How to Play</h2>
-            <h3>Find words that share a shadow</h3>
+            <h3>Find words that fit the shadow</h3>
             <ul class="how-to-play">
-                <li>Words must fit the shape of the shadow</li>
+                <li>Words must match the shape of the shadow</li>
                 <li>Only lowercase characters are used</li>
                 <li>Letters can be used more than once</li>
                 <li>Proper nouns do not count ☹</li>
