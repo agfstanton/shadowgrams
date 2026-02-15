@@ -1251,18 +1251,22 @@ function shareResults() {
             return;
         }
 
-        tryNativeShare(shareMessage).then((shared) => {
-            if (shared) {
-                showMessage('shared!', 'success');
-            } else {
-                // Only try clipboard if native share didn't work
-                copyToClipboard(shareMessage).then(() => {
-                    showMessage('copied to clipboard!', 'success');
-                }).catch(() => {
-                    showMessage('failed to copy', 'error');
-                });
-            }
-        });
+        // Mobile: use native share only
+        if (navigator.share) {
+            tryNativeShare(shareMessage).then((shared) => {
+                if (shared) {
+                    showMessage('shared!', 'success');
+                }
+                // Don't show error if user cancels share dialog
+            });
+        } else {
+            // Desktop: use clipboard only
+            copyToClipboard(shareMessage).then(() => {
+                showMessage('copied to clipboard!', 'success');
+            }).catch(() => {
+                showMessage('failed to copy', 'error');
+            });
+        }
     } catch(e) {
         console.error('Error sharing results:', e);
         showMessage('failed to share', 'error');
@@ -1282,16 +1286,20 @@ function shareFromBestModal(btnEl) {
         return;
     }
 
-    if (btnEl) {
-        btnEl.textContent = 'opening share...';
-    }
-
-    tryNativeShare(shareMessage).then((shared) => {
-        if (shared) {
-            if (btnEl) btnEl.textContent = 'shared!';
-            return;
+    // Mobile: use native share only
+    if (navigator.share) {
+        if (btnEl) {
+            btnEl.textContent = 'opening share...';
         }
 
+        tryNativeShare(shareMessage).then((shared) => {
+            if (shared && btnEl) {
+                btnEl.textContent = 'shared!';
+            }
+            // Don't show error if user cancels share dialog
+        });
+    } else {
+        // Desktop: use clipboard only
         if (btnEl) {
             btnEl.textContent = 'copying...';
         }
@@ -1303,7 +1311,7 @@ function shareFromBestModal(btnEl) {
         }).catch(() => {
             if (btnEl) btnEl.textContent = 'failed to copy';
         });
-    });
+    }
 }
 
 function tryNativeShare(text) {

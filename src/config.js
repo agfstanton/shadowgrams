@@ -58,8 +58,8 @@ const API_CONFIG = {
 };
 
 // Game launch date
-const GAME_LAUNCH_DATE = 'February 14, 2026'; // Used in comments
-const GAME_LAUNCH_UTC = new Date('2026-02-14');
+const GAME_LAUNCH_DATE = 'February 15, 2026'; // Used in comments
+const GAME_LAUNCH_UTC = new Date('2026-02-15');
 
 // Timezone
 const TIMEZONE = 'America/Chicago';
