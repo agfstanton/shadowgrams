@@ -63111,6 +63111,7 @@ scapegoating
 scapegoats
 scapegrace
 scapegraces
+scapes
 scapula
 scapulae
 scapular
@@ -63673,6 +63674,7 @@ scrutinized
 scrutinizes
 scrutinizing
 scrutiny
+scryer
 scuba
 scubaed
 scubaing
@@ -64465,6 +64467,7 @@ serfs
 serge
 sergeant
 sergeants
+serger
 serges%
 serial
 serialization
