@@ -537,6 +537,7 @@ function renderTiles() {
     
     // Update responsive gap after tiles render
     updateTileGap();
+    updateTileFontSize();
 }
 
 /**
@@ -572,6 +573,27 @@ function updateTileGap() {
     } else {
         // Use setTimeout to ensure DOM has updated
         setTimeout(updateGap, 0);
+    }
+}
+
+function updateTileFontSize() {
+    const tilesDisplay = document.querySelector('.tiles-display');
+    const firstTileImg = tilesDisplay?.querySelector('.tile img');
+    
+    if (!firstTileImg) return;
+    
+    const updateFontSize = () => {
+        const actualHeight = firstTileImg.offsetHeight;
+        if (actualHeight > 0) {
+            const fontSize = actualHeight * 0.75;
+            document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
+        }
+    };
+    
+    if (!firstTileImg.complete) {
+        firstTileImg.addEventListener('load', updateFontSize, { once: true });
+    } else {
+        setTimeout(updateFontSize, 0);
     }
 }
 
@@ -709,6 +731,7 @@ async function init() {
                 // Open modal
                 setModalHeight();
                 updateTileGap();
+                updateTileFontSize();
                 infoModal.classList.add('open');
                 if (logo) logo.classList.add('white');
                 if (copyright) copyright.classList.add('white');
@@ -769,6 +792,7 @@ async function init() {
     
     // Update tile gap on window resize
     window.addEventListener('resize', updateTileGap);
+    window.addEventListener('resize', updateTileFontSize);
 }
 
 function setupMobileInput() {
