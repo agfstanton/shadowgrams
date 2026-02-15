@@ -1418,6 +1418,12 @@ function copyToClipboard(text) {
 function updateScore() {
     document.getElementById('score').textContent = score;
     updateIndicators();
+    trackEvent('score_updated', {
+        score: score,
+        total_words: totalWords,
+        puzzle_number: getCurrentPuzzleNumber(),
+        pattern_length: CURRENT_PATTERN.length
+    });
 }
 
 function updateIndicators() {
