@@ -250,6 +250,8 @@ body {
     position: relative;
     transition: filter 0.2s ease;
 }
+    transition: filter 0.2s ease;
+}
 
 .tile.incorrect {
     animation: flash-red 0.5s ease;

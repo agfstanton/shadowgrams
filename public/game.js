@@ -541,6 +541,24 @@ function renderTiles() {
 }
 
 /**
+ * Update tile font size based on tiles-display height
+ */
+function updateTileFontSize() {
+    const tilesDisplay = document.querySelector('.tiles-display');
+    if (!tilesDisplay) return;
+    
+    const updateSize = () => {
+        const displayHeight = tilesDisplay.offsetHeight;
+        if (displayHeight > 0) {
+            const fontSize = displayHeight * 0.75;
+            document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
+        }
+    };
+    
+    setTimeout(updateSize, 0);
+}
+
+/**
  * Update tile gap based on actual rendered tile height
  */
 function updateTileGap() {
@@ -573,27 +591,6 @@ function updateTileGap() {
     } else {
         // Use setTimeout to ensure DOM has updated
         setTimeout(updateGap, 0);
-    }
-}
-
-function updateTileFontSize() {
-    const tilesDisplay = document.querySelector('.tiles-display');
-    const firstTileImg = tilesDisplay?.querySelector('.tile img');
-    
-    if (!firstTileImg) return;
-    
-    const updateFontSize = () => {
-        const actualHeight = firstTileImg.offsetHeight;
-        if (actualHeight > 0) {
-            const fontSize = actualHeight * 0.75;
-            document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
-        }
-    };
-    
-    if (!firstTileImg.complete) {
-        firstTileImg.addEventListener('load', updateFontSize, { once: true });
-    } else {
-        setTimeout(updateFontSize, 0);
     }
 }
 
@@ -731,7 +728,6 @@ async function init() {
                 // Open modal
                 setModalHeight();
                 updateTileGap();
-                updateTileFontSize();
                 infoModal.classList.add('open');
                 if (logo) logo.classList.add('white');
                 if (copyright) copyright.classList.add('white');
