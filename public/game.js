@@ -3,7 +3,7 @@
 // TILES, SCORE_THRESHOLDS, STORAGE_KEYS, FILE_PATHS, SUCCESS_MESSAGES, GAME_CONFIG should be available in window scope
 
 // Aliases for backward compatibility and local references
-const EXPANDED_LIST_PATH = FILE_PATHS?.expandedList || '2of12inf.txt';
+const EXPANDED_LIST_PATH = FILE_PATHS?.expandedList || 'wordlist-20260215.txt';
 const STORAGE_KEY = STORAGE_KEYS?.pattern || 'shadowgrams_current_pattern';
 const HISTORY_KEY = STORAGE_KEYS?.history || 'shadowgrams_history';
 const FOUND_WORDS_KEY = STORAGE_KEYS?.foundWords || 'shadowgrams_found_words';
@@ -13,8 +13,8 @@ const INACTIVITY_TIMEOUT = GAME_CONFIG?.inactivityTimeout || 10 * 60 * 1000;
 
 // ====== GAME STATE ======
 let validWords = [];  // Words from CSV (determines thresholds)
-let allExpandedWords = [];  // All words from 2of12inf.txt
-let expandedValidWords = new Set();  // Words from 2of12inf.txt (used for validation)
+let allExpandedWords = [];  // All words from wordlist-20260215.txt
+let expandedValidWords = new Set();  // Words from wordlist-20260215.txt (used for validation)
 let foundWords = new Set();
 let score = 0;
 let totalWords = 0;
@@ -189,11 +189,11 @@ function parseCSVRow(line) {
 }
 
 /**
- * Load validation words from 2of12inf.txt and puzzle data from API
+ * Load validation words from wordlist-20260215.txt and puzzle data from API
  */
 async function loadWordlist() {
     try {
-        // Load the expanded wordlist from 2of12inf.txt for validation only
+        // Load the expanded wordlist from wordlist-20260215.txt for validation only
         let expandedWords = [];
         try {
             const expandedResponse = await fetch(EXPANDED_LIST_PATH);
@@ -202,7 +202,7 @@ async function loadWordlist() {
                 .map(word => word.trim().toLowerCase())
                 .filter(word => word.length > 0);
         } catch (e) {
-            console.warn('Could not load 2of12inf.txt for validation:', e);
+            console.warn('Could not load wordlist-20260215.txt for validation:', e);
             console.warn('Word validation will be limited');
         }
         

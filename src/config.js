@@ -28,7 +28,7 @@ const STORAGE_KEYS = {
 
 // File paths
 const FILE_PATHS = {
-    expandedList: '2of12inf.txt'  // Used for word validation only
+    expandedList: 'wordlist-20260215.txt'  // Used for word validation only
 };
 
 // Success messages by puzzle length
