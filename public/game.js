@@ -535,40 +535,60 @@ function renderTiles() {
         tilesDisplay.appendChild(tile);
     });
     
-    // Update responsive gap after tiles render
-    updateTileGap();
-    updateTileFontSize();
+    // Wait for all images to load, then update gap and font size, then show container
+    waitForImagesAndShowContainer();
 }
 
 /**
- * Update tile font size based on tiles-display height
+ * Wait for all tile images to load, calculate sizes, then make container visible
  */
-function updateTileFontSize() {
+function waitForImagesAndShowContainer() {
     const tilesDisplay = document.querySelector('.tiles-display');
-    if (!tilesDisplay) return;
+    const gameContainer = document.querySelector('.game-container');
+    if (!tilesDisplay || !gameContainer) return;
     
-    const updateSize = () => {
-        const displayHeight = tilesDisplay.offsetHeight;
-        if (displayHeight > 0) {
-            const fontSize = displayHeight * 0.75;
-            document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
-        }
-    };
-    
-    // Wait for all tile images to load before calculating
     const images = tilesDisplay.querySelectorAll('img');
     let loadedCount = 0;
+    
+    const onAllImagesLoaded = () => {
+        // Add delay to ensure layout is fully settled
+        setTimeout(() => {
+            // Update calculations
+            const firstTileImg = tilesDisplay.querySelector('.tile img');
+            if (firstTileImg && firstTileImg.offsetHeight > 0) {
+                const gap = firstTileImg.offsetHeight / 39;
+                document.documentElement.style.setProperty('--tile-gap', `${gap}px`);
+            }
+
+            const firstLegendTile = document.querySelector('.legend-letter');
+            if (firstLegendTile) {
+                const legendHeight = firstLegendTile.getBoundingClientRect().height;
+                if (legendHeight > 0) {
+                    const legendGap = legendHeight / 39;
+                    document.documentElement.style.setProperty('--legend-gap', `${legendGap}px`);
+                }
+            }
+
+            const displayHeight = tilesDisplay.offsetHeight;
+            if (displayHeight > 0) {
+                const fontSize = displayHeight * 0.75;
+                document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
+            }
+            
+            // Now make container visible
+            gameContainer.style.opacity = '1';
+        }, 50);
+    };
     
     const checkAllLoaded = () => {
         loadedCount++;
         if (loadedCount === images.length) {
-            // Add extra delay to ensure layout is fully settled
-            setTimeout(updateSize, 50);
+            onAllImagesLoaded();
         }
     };
     
     if (images.length === 0) {
-        setTimeout(updateSize, 50);
+        onAllImagesLoaded();
     } else {
         images.forEach(img => {
             if (img.complete) {
@@ -581,55 +601,42 @@ function updateTileFontSize() {
 }
 
 /**
- * Update tile gap based on actual rendered tile height
+ * Update tile font size based on tiles-display height (for window resize events)
+ */
+function updateTileFontSize() {
+    const tilesDisplay = document.querySelector('.tiles-display');
+    if (!tilesDisplay) return;
+    
+    const displayHeight = tilesDisplay.offsetHeight;
+    if (displayHeight > 0) {
+        const fontSize = displayHeight * 0.75;
+        document.documentElement.style.setProperty('--tile-font-size', `${fontSize}px`);
+    }
+}
+
+/**
+ * Update tile gap based on actual rendered tile height (for window resize events)
  */
 function updateTileGap() {
     const tilesDisplay = document.querySelector('.tiles-display');
     if (!tilesDisplay) return;
     
-    // Function to update the gap
-    const updateGap = () => {
-        const firstTileImg = tilesDisplay.querySelector('.tile img');
-        if (!firstTileImg) return;
-        
-        const actualHeight = firstTileImg.offsetHeight;
-        if (actualHeight > 0) {
-            const gap = actualHeight / 39;
-            document.documentElement.style.setProperty('--tile-gap', `${gap}px`);
-        }
+    const firstTileImg = tilesDisplay.querySelector('.tile img');
+    if (!firstTileImg) return;
+    
+    const actualHeight = firstTileImg.offsetHeight;
+    if (actualHeight > 0) {
+        const gap = actualHeight / 39;
+        document.documentElement.style.setProperty('--tile-gap', `${gap}px`);
+    }
 
-        const firstLegendTile = document.querySelector('.legend-letter');
-        if (firstLegendTile) {
-            const legendHeight = firstLegendTile.getBoundingClientRect().height;
-            if (legendHeight > 0) {
-                const legendGap = legendHeight / 39;
-                document.documentElement.style.setProperty('--legend-gap', `${legendGap}px`);
-            }
+    const firstLegendTile = document.querySelector('.legend-letter');
+    if (firstLegendTile) {
+        const legendHeight = firstLegendTile.getBoundingClientRect().height;
+        if (legendHeight > 0) {
+            const legendGap = legendHeight / 39;
+            document.documentElement.style.setProperty('--legend-gap', `${legendGap}px`);
         }
-    };
-    
-    // Wait for all tile images to load before calculating
-    const images = tilesDisplay.querySelectorAll('img');
-    let loadedCount = 0;
-    
-    const checkAllLoaded = () => {
-        loadedCount++;
-        if (loadedCount === images.length) {
-            // Add extra delay to ensure layout is fully settled
-            setTimeout(updateGap, 50);
-        }
-    };
-    
-    if (images.length === 0) {
-        setTimeout(updateGap, 50);
-    } else {
-        images.forEach(img => {
-            if (img.complete) {
-                checkAllLoaded();
-            } else {
-                img.addEventListener('load', checkAllLoaded, { once: true });
-            }
-        });
     }
 }
 
