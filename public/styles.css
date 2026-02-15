@@ -175,8 +175,10 @@ body {
 }
 
 .info-icon:hover {
-    transform: scale(1.2);
+    transform: scale(1.08);
+    background: var(--color-white);
 }
+
 
 .info-icon.hidden {
     visibility: hidden;
@@ -269,7 +271,7 @@ body {
     height: auto;
     max-width: 100%;
     display: block;
-    transition: opacity 0.1s ease;
+    aspect-ratio: 115 / 195;
 }
 
 .tile.invalid-letter img {
@@ -452,6 +454,16 @@ body {
     transform: translateY(1px);
 }
 
+.puzzle-btn.active {
+    transform: translateY(1px);
+    background: var(--color-white);
+}
+
+.clear-btn.active,
+.submit-btn.active {
+    background: var(--color-gray) !important;
+}
+
 button:active {
     transform: translateY(0);
 }
@@ -500,6 +512,35 @@ button:active {
     align-items: flex-start;
     gap: 8px;
     margin-bottom: 8px;
+    position: relative;
+}
+
+.persistent-share-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-gray);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+    padding: 0;
+}
+
+.persistent-share-btn:hover {
+    background: var(--color-white);
+    transform: scale(1.08);
+}
+
+.persistent-share-btn .icon-svg {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) saturate(100%);
 }
 
 .score-circle {
@@ -906,6 +947,10 @@ hr{
 
 .best-share-btn {
     margin-top: 0;
+}
+
+.best-share-btn .icon-svg {
+    filter: brightness(0) invert(1);
 }
 
 /* Footer */

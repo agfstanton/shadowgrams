@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shadowgrams</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+        (function() {
+            var hostname = window.location.hostname || '';
+            var isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname.endsWith('.local');
+            if (isLocalhost) {
+                return;
+            }
+
+            !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]);var n=t[e];t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0))),n&&n.apply(t,arguments)}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once people.unset people.increment people.append people.remove people.group identify_group group set_group add_group remove_group get_groups reset debug get_property get_distinct_id on ready opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing startSessionRecording stopSessionRecording isSessionRecordingRunning enableRecording disableRecording getActiveFeatureFlags isFeatureEnabled onFeatureFlags reloadFeatureFlags").split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+            posthog.init('phc_5VznCURI70V8s1PQjxHCFMC8F2p5WgAVnVSRlf91KcO',{api_host:'https://app.posthog.com',autocapture:true,capture_pageview:true});
+        })();
+    </script>
 </head>
 <body>
     <div class="logo-container">
@@ -36,7 +48,7 @@
                 <div class="buttons-row">
                     <button id="clearBtn" class="puzzle-btn clear-btn" title="Clear">
                         clear
-                        <img src="icons/backspace.svg" alt="" class="icon-svg" aria-hidden="true">
+                        <img src="icons/cancel_presentation.svg" alt="" class="icon-svg" aria-hidden="true">
                     </button>
                     <button id="submitBtn" class="puzzle-btn submit-btn" title="Enter">
                         enter
@@ -57,6 +69,9 @@
                         <div class="words-found-label">words found</div>
                         <div class="next-level-text"><span id="next-level-count">30</span> to <span id="next-level-name" class="next-level-name">yellow</span></div>
                     </div>
+                    <button id="persistentShareBtn" class="persistent-share-btn" title="Share" style="display: none;">
+                        <img src="icons/share.svg" alt="Share" class="icon-svg">
+                    </button>
                 </div>
                 
                 <div class="words-grid" id="wordsGrid"></div>
@@ -83,9 +98,9 @@
     <div id="infoModal" class="modal">
         <div class="modal-content">
             <h2>How to Play</h2>
-            <h3>Find words that share a shadow</h3>
+            <h3>Find words that fit the shadow</h3>
             <ul class="how-to-play">
-                <li>Words must fit the shape of the shadow</li>
+                <li>Words must match the shape of the shadow</li>
                 <li>Only lowercase characters are used</li>
                 <li>Letters can be used more than once</li>
                 <li>Proper nouns do not count ☹</li>
