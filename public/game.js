@@ -555,7 +555,29 @@ function updateTileFontSize() {
         }
     };
     
-    setTimeout(updateSize, 0);
+    // Wait for all tile images to load before calculating
+    const images = tilesDisplay.querySelectorAll('img');
+    let loadedCount = 0;
+    
+    const checkAllLoaded = () => {
+        loadedCount++;
+        if (loadedCount === images.length) {
+            // Add extra delay to ensure layout is fully settled
+            setTimeout(updateSize, 50);
+        }
+    };
+    
+    if (images.length === 0) {
+        setTimeout(updateSize, 50);
+    } else {
+        images.forEach(img => {
+            if (img.complete) {
+                checkAllLoaded();
+            } else {
+                img.addEventListener('load', checkAllLoaded, { once: true });
+            }
+        });
+    }
 }
 
 /**
