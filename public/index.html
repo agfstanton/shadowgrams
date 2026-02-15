@@ -124,23 +124,23 @@
                     </button>
                 </div>
                 
-                <div class="words-grid" id="wordsGrid"></div>
+                <div class="words-grid-wrapper">
+                    <div class="words-grid" id="wordsGrid"></div>
+                    
+                    <!-- Best Level Modal (Overlay) -->
+                    <div id="bestModal" class="best-modal">
+                        <div class="best-modal-content">
+                            <img src="assets/search.svg" alt="Magnifying glass" class="best-modal-image">
+                            <p class="best-modal-text">nice work, detective!</p>
+                            <p class="best-modal-text">you uncovered <span id="bestModalCount">0</span> word<span id="bestModalPlural">s</span>.</p>
+                            <div class="best-modal-actions">
+                                <button id="bestShareBtn" class="puzzle-btn best-share-btn">brag about it</button>
+                                <button id="bestKeepPlayingBtn" class="puzzle-btn best-keep-btn">keep playing</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Best Level Modal -->
-    <div id="bestModal" class="best-modal">
-        <div class="best-modal-content">
-            <img src="assets/high-five.svg" alt="High five!" class="best-modal-image">
-            <p class="best-modal-text">nice!</p>
-            <p class="best-modal-text">you found <span id="bestModalCount">0</span> word<span id="bestModalPlural">s</span>.</p>
-            <p class="best-modal-text">that makes you (one of) the best.</p>
-            <div class="best-modal-actions">
-                <button id="bestShareBtn" class="puzzle-btn best-share-btn">brag about it</button>
-                <button id="bestKeepPlayingBtn" class="puzzle-btn best-keep-btn">keep playing</button>
-            </div>
-            <p id="bestShareStatus" class="best-share-status"></p>
         </div>
     </div>
 
@@ -195,7 +195,7 @@
                 <li>Every day at midnight central</li>
             </ul>
             <div class="modal-footer">
-                <div>&copy; <span id="copyrightYear"></span> audrey stanton</div>
+                <p>&copy; <span id="copyrightYear"></span> audrey stanton</p>
             </div>
         </div>
     </div>

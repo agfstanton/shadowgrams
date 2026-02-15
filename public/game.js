@@ -778,6 +778,7 @@ async function init() {
     if (bestModal) {
         bestModal.addEventListener('click', (e) => {
             const target = e.target;
+            // Handle button clicks
             if (target && target.id === 'bestShareBtn') {
                 shareFromBestModal(target);
                 return;
@@ -786,7 +787,29 @@ async function init() {
                 hideBestModal();
                 return;
             }
+            // Handle clicking outside modal content (on overlay/words grid area)
+            // This allows mobile tap-to-dismiss and covers accidental taps
+            if (e.target === bestModal) {
+                const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+                if (isMobile) {
+                    hideBestModal();
+                }
+            }
         });
+        
+        // Desktop typing dismissal
+        const handleBestModalKeypress = (e) => {
+            if (!bestModal.classList.contains('open')) {
+                return;
+            }
+            const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+            // On desktop, typing any key dismisses the modal
+            if (!isMobile && e.key && e.key.length === 1) {
+                hideBestModal();
+            }
+        };
+        
+        document.addEventListener('keydown', handleBestModalKeypress);
     }
 
     const bestCloseBtn = document.getElementById('bestCloseBtn');
@@ -1511,6 +1534,7 @@ function showBestModal() {
     const bestCount = document.getElementById('bestModalCount');
     const bestPlural = document.getElementById('bestModalPlural');
     const infoBtn = document.getElementById('infoBtn');
+    const persistentShareBtn = document.getElementById('persistentShareBtn');
 
     if (bestCount) bestCount.textContent = score;
     if (bestPlural) bestPlural.textContent = score === 1 ? '' : 's';
@@ -1525,9 +1549,16 @@ function showBestModal() {
             score: score
         });
     }
-
-    if (infoBtn) {
-        infoBtn.classList.add('hidden');
+    
+    // Hide persistent share button when best modal is shown
+    if (persistentShareBtn) {
+        persistentShareBtn.style.display = 'none';
+    }
+    
+    // Dismiss keyboard on mobile
+    const mobileInput = document.getElementById('mobileInput');
+    if (mobileInput) {
+        mobileInput.blur();
     }
 }
 
@@ -1560,12 +1591,20 @@ function markBestModalShown() {
 function hideBestModal() {
     const bestModal = document.getElementById('bestModal');
     const infoBtn = document.getElementById('infoBtn');
+    const persistentShareBtn = document.getElementById('persistentShareBtn');
+    
     if (bestModal) {
         bestModal.classList.remove('open');
     }
-    if (infoBtn) {
-        infoBtn.classList.remove('hidden');
+    
+    // Fade in persistent share button when modal dismissed
+    if (persistentShareBtn) {
+        persistentShareBtn.style.display = 'flex';
+        // Trigger reflow to ensure CSS transition plays
+        persistentShareBtn.offsetHeight;
+        persistentShareBtn.classList.add('fade-in');
     }
+    
     refocusMobileInput();
 }
 
