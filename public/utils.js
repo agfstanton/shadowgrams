@@ -23,10 +23,10 @@ function getCentralDateString(date = null) {
 }
 
 /**
- * Get days since game launch (Feb 14, 2026)
+ * Get days since game launch (Feb 15, 2026)
  */
 function getDaysSinceLaunch() {
-    const startDate = new Date('2026-02-14');
+    const startDate = new Date('2026-02-15');
     startDate.setHours(0, 0, 0, 0);
     
     const now = new Date();
