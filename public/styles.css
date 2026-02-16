@@ -496,6 +496,7 @@ button:active {
     gap: 8px;
     margin-bottom: 8px;
     position: relative;
+    overflow: visible;
 }
 
 .persistent-share-btn {
@@ -537,17 +538,51 @@ button:active {
 }
 
 .score-circle {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     margin-left: -10px;
     margin-top: -10px;
     border-radius: 0 50% 50% 50%;
-    background: var(--color-gray);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: background 0.3s ease;
+    position: relative;
+    overflow: visible;
+}
+
+.score-level-icon {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.score-level-icon.is-swapping {
+    animation: score-level-swap 0.32s ease-in-out both;
+    transform-origin: center;
+}
+
+@keyframes score-level-swap {
+    0% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(0);
+    }
+    55% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.score-level-icon path {
+    transition: fill 0.3s ease;
 }
 
 .score-circle #score {
@@ -556,6 +591,8 @@ button:active {
     font-size: 16px;
     color: var(--color-black);
     transform: translateY(-1px);
+    position: relative;
+    z-index: 1;
 }
 
 .score-info {
@@ -608,7 +645,7 @@ button:active {
     flex-grow: 1;
     min-height: 0;
     align-content: start;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .words-grid-wrapper {

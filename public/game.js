@@ -10,6 +10,7 @@ const FOUND_WORDS_KEY = STORAGE_KEYS?.foundWords || 'shadowgrams_found_words';
 const BEST_MODAL_KEY = STORAGE_KEYS?.bestModal || 'shadowgrams_best_modal_shown';
 const TYPE_TO_BEGIN_KEY = STORAGE_KEYS?.typeToBegin || 'shadowgrams_type_to_begin_completed';
 const INACTIVITY_TIMEOUT = GAME_CONFIG?.inactivityTimeout || 10 * 60 * 1000;
+const LEVEL_SWAP_DURATION = 320;
 
 // ====== GAME STATE ======
 let validWords = [];  // Words from CSV (determines thresholds)
@@ -45,6 +46,12 @@ let bestModalShown = false;
 let faviconAnimationInterval = null;
 let isInactive = false;
 let previousThresholdLevel = null; // Track previous level for animation
+let levelIconData = null;
+let currentLevelPath = null;
+let levelMorphAnimationId = null;
+let levelSwapTimeoutId = null;
+let levelSwapCleanupId = null;
+let scoreDisplayTimeoutId = null;
 
 function trackEvent(eventName, properties) {
     if (typeof window === 'undefined') {
@@ -709,7 +716,8 @@ async function init() {
     // Set copyright year
     const yearEl = document.getElementById('copyrightYear');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
-    
+
+    await loadLevelIcons();
 
     
     // Load wordlist and validate
@@ -1426,8 +1434,96 @@ function copyToClipboard(text) {
     });
 }
 
+async function loadLevelIcons() {
+    const levelKeys = ['gray', 'yellow', 'green', 'light-blue'];
+    const levelFiles = ['assets/Level0.svg', 'assets/Level1.svg', 'assets/Level2.svg', 'assets/Level3.svg'];
+
+    try {
+        const responses = await Promise.all(levelFiles.map((file) => fetch(file)));
+        const svgTexts = await Promise.all(responses.map((response) => response.text()));
+        const parser = new DOMParser();
+
+        levelIconData = {};
+        svgTexts.forEach((text, index) => {
+            const doc = parser.parseFromString(text, 'image/svg+xml');
+            const svg = doc.querySelector('svg');
+            const path = doc.querySelector('path');
+
+            if (!svg || !path) {
+                return;
+            }
+
+            levelIconData[levelKeys[index]] = {
+                d: path.getAttribute('d'),
+                viewBox: svg.getAttribute('viewBox') || '0 0 90 90'
+            };
+        });
+    } catch (error) {
+        console.error('Error loading level icons:', error);
+        levelIconData = null;
+    }
+}
+
+function setScoreLevelIcon(levelKey, animate) {
+    const iconSvg = document.getElementById('scoreLevelIcon');
+    const iconPath = document.getElementById('scoreLevelPath');
+
+    if (!iconSvg || !iconPath || !levelIconData) {
+        return;
+    }
+
+    const nextIcon = levelIconData[levelKey];
+    if (!nextIcon || !nextIcon.d) {
+        return;
+    }
+
+    iconSvg.setAttribute('viewBox', nextIcon.viewBox);
+
+    const levelColors = {
+        gray: 'var(--color-gray)',
+        yellow: 'var(--color-yellow)',
+        green: 'var(--color-green)',
+        'light-blue': 'var(--color-light-blue)'
+    };
+
+    iconPath.style.fill = levelColors[levelKey] || 'var(--color-gray)';
+
+    if (!animate) {
+        iconPath.setAttribute('d', nextIcon.d);
+        currentLevelPath = nextIcon.d;
+        return;
+    }
+
+    if (levelMorphAnimationId) {
+        cancelAnimationFrame(levelMorphAnimationId);
+    }
+
+    if (levelSwapTimeoutId) {
+        clearTimeout(levelSwapTimeoutId);
+    }
+
+    if (levelSwapCleanupId) {
+        clearTimeout(levelSwapCleanupId);
+    }
+
+    iconSvg.classList.remove('is-swapping');
+    void iconSvg.offsetWidth;
+    iconSvg.classList.add('is-swapping');
+
+    const swapDuration = LEVEL_SWAP_DURATION;
+    const halfDuration = swapDuration / 2;
+
+    levelSwapTimeoutId = setTimeout(() => {
+        iconPath.setAttribute('d', nextIcon.d);
+        currentLevelPath = nextIcon.d;
+    }, halfDuration);
+
+    levelSwapCleanupId = setTimeout(() => {
+        iconSvg.classList.remove('is-swapping');
+    }, swapDuration);
+}
+
 function updateScore() {
-    document.getElementById('score').textContent = score;
     updateIndicators();
     trackEvent('score_updated', {
         score: score,
@@ -1439,6 +1535,7 @@ function updateScore() {
 
 function updateIndicators() {
     const scoreCircle = document.querySelector('.score-circle');
+    const scoreEl = document.getElementById('score');
     const nextLevelCount = document.getElementById('next-level-count');
     const nextLevelName = document.getElementById('next-level-name');
     const nextLevelText = document.querySelector('.next-level-text');
@@ -1505,8 +1602,10 @@ function updateIndicators() {
         }
     }
     
+    const levelChanged = previousThresholdLevel !== null && previousThresholdLevel !== currentLevel;
+
     // Check if threshold level changed - if so, trigger animation
-    if (previousThresholdLevel !== null && previousThresholdLevel !== currentLevel) {
+    if (levelChanged) {
         if (scoreCircle) {
             scoreCircle.classList.remove('threshold-reached');
             // Trigger reflow to restart animation
@@ -1514,10 +1613,27 @@ function updateIndicators() {
             scoreCircle.classList.add('threshold-reached');
         }
     }
+
+    setScoreLevelIcon(currentLevel, levelChanged);
     previousThresholdLevel = currentLevel;
-    
-    // Update circle color
-    if (scoreCircle) {
+
+    if (scoreDisplayTimeoutId) {
+        clearTimeout(scoreDisplayTimeoutId);
+        scoreDisplayTimeoutId = null;
+    }
+
+    if (scoreEl) {
+        if (levelChanged) {
+            scoreDisplayTimeoutId = setTimeout(() => {
+                scoreEl.textContent = score;
+            }, LEVEL_SWAP_DURATION / 2);
+        } else {
+            scoreEl.textContent = score;
+        }
+    }
+
+    // Fallback background if SVGs fail to load
+    if (scoreCircle && !levelIconData) {
         scoreCircle.style.background = circleColor;
     }
     
