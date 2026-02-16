@@ -7,6 +7,7 @@
     --color-yellow: #FBDB65;
     --color-green: #B5C900;
     --color-dark-blue: #3B3FB6;
+    --color-orange: #FFA400;
 }
 
 * {
@@ -593,6 +594,10 @@ button:active {
 
 .next-level-name.light-blue {
     color: var(--color-light-blue);
+}
+
+.next-level-name.orange {
+    color: var(--color-orange);
 }
 
 .words-grid {

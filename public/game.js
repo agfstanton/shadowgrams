@@ -18,6 +18,7 @@ let expandedValidWords = new Set();  // Words from wordlist-20260215.txt (used f
 let foundWords = new Set();
 let score = 0;
 let totalWords = 0;
+let dimThreshold = 0;
 let goodThreshold = 0;
 let betterThreshold = 0;
 let bestThreshold = 0;
@@ -42,6 +43,8 @@ let tileModifiedSrcs = {}; // Cache of color-modified SVG data URLs
 let inactivityTimeoutId = null;
 let lastActivityTime = Date.now();
 let bestModalShown = false;
+let faviconAnimationInterval = null;
+let isInactive = false;
 
 function trackEvent(eventName, properties) {
     if (typeof window === 'undefined') {
@@ -339,13 +342,17 @@ function applyPattern(patternArray, wordCount, thresholds) {
         goodThreshold = thresholds.good;
         betterThreshold = thresholds.better;
         bestThreshold = thresholds.best;
+        // Calculate dimThreshold as 10% of goodThreshold
+        dimThreshold = Math.ceil(goodThreshold * 0.10) || 0;
     } else {
         // Fallback for edge cases (shouldn't happen)
         if (totalWords === 2) {
+            dimThreshold = 0;
             goodThreshold = 1;
             betterThreshold = 2;
             bestThreshold = 2;
         } else {
+            dimThreshold = Math.ceil(totalWords * 0.03);
             goodThreshold = Math.ceil(totalWords * 0.30);
             betterThreshold = Math.ceil(totalWords * 0.50);
             bestThreshold = Math.ceil(totalWords * 0.80);
@@ -1440,50 +1447,59 @@ function updateIndicators() {
     
     // Determine current milestone level and next threshold
     let circleColor = 'var(--color-gray)';
-    let nextThreshold = goodThreshold;
-    let nextThresholdName = 'good';
-    let nextThresholdClass = 'yellow';
+    let nextThreshold = dimThreshold;
+    let nextThresholdName = 'dim';
+    let nextThresholdClass = 'light-blue';
     
     if (score >= bestThreshold) {
-        // At highest level (light-blue)
-        circleColor = 'var(--color-light-blue)';
+        // At highest level (orange)
+        circleColor = 'var(--color-orange)';
         nextThreshold = null; // No next level
-        nextThresholdName = 'best';
-        nextThresholdClass = 'light-blue';
+        nextThresholdName = 'luminous';
+        nextThresholdClass = 'orange';
         if (wordsFoundLabel) {
-            wordsFoundLabel.style.color = 'var(--color-light-blue)';
+            wordsFoundLabel.style.color = 'var(--color-orange)';
         }
     } else if (score >= betterThreshold) {
-        // At green level
-        circleColor = 'var(--color-green)';
-        nextThreshold = bestThreshold;
-        nextThresholdName = 'best';
-        nextThresholdClass = 'light-blue';
-        if (wordsFoundLabel) {
-            wordsFoundLabel.style.color = 'var(--color-green)';
-        }
-    } else if (score >= goodThreshold) {
         // At yellow level
         circleColor = 'var(--color-yellow)';
+        nextThreshold = bestThreshold;
+        nextThresholdName = 'luminous';
+        nextThresholdClass = 'orange';
+        if (wordsFoundLabel) {
+            wordsFoundLabel.style.color = 'var(--color-yellow)';
+        }
+    } else if (score >= goodThreshold) {
+        // At green level
+        circleColor = 'var(--color-green)';
         // If better and best thresholds are the same (e.g., 2-word puzzles), skip to best
         if (betterThreshold === bestThreshold) {
             nextThreshold = bestThreshold;
-            nextThresholdName = 'best';
-            nextThresholdClass = 'light-blue';
+            nextThresholdName = 'luminous';
+            nextThresholdClass = 'orange';
         } else {
             nextThreshold = betterThreshold;
-            nextThresholdName = 'better';
-            nextThresholdClass = 'green';
+            nextThresholdName = 'brilliant';
+            nextThresholdClass = 'yellow';
         }
         if (wordsFoundLabel) {
-            wordsFoundLabel.style.color = 'var(--color-yellow)';
+            wordsFoundLabel.style.color = 'var(--color-green)';
+        }
+    } else if (score >= dimThreshold) {
+        // At light-blue level
+        circleColor = 'var(--color-light-blue)';
+        nextThreshold = goodThreshold;
+        nextThresholdName = 'bright';
+        nextThresholdClass = 'green';
+        if (wordsFoundLabel) {
+            wordsFoundLabel.style.color = 'var(--color-light-blue)';
         }
     } else {
         // At gray level (starting)
         circleColor = 'var(--color-gray)';
-        nextThreshold = goodThreshold;
-        nextThresholdName = 'good';
-        nextThresholdClass = 'yellow';
+        nextThreshold = dimThreshold;
+        nextThresholdName = 'dim';
+        nextThresholdClass = 'light-blue';
         if (wordsFoundLabel) {
             wordsFoundLabel.style.color = 'var(--color-gray)';
         }
@@ -1518,7 +1534,7 @@ function updateIndicators() {
     if (score >= bestThreshold) {
         // At best level - show celebratory message
         if (nextLevelText) {
-            nextLevelText.innerHTML = `you're the <span class="next-level-name light-blue">best</span>!`;
+            nextLevelText.innerHTML = `you're <span class="next-level-name orange">luminous</span>!`;
         }
     } else {
         // Show remaining words to next level
@@ -1669,15 +1685,138 @@ function initializeInactivityTracking() {
 function resetInactivityTimer() {
     lastActivityTime = Date.now();
     
+    // Stop favicon animation if user becomes active
+    if (isInactive) {
+        stopFaviconAnimation();
+    }
+    
     // Clear existing timeout
     if (inactivityTimeoutId) {
         clearTimeout(inactivityTimeoutId);
     }
     
-    // Set new timeout for 10 minutes of inactivity (placeholder - was welcome back modal)
+    // Set new timeout for 10 minutes of inactivity
     inactivityTimeoutId = setTimeout(() => {
-        // Inactivity timeout - can implement different behavior later
+        startFaviconAnimation();
     }, INACTIVITY_TIMEOUT);
+}
+
+/**
+ * Start the favicon sleeping animation (designed to handle tab throttling)
+ */
+function startFaviconAnimation() {
+    if (faviconAnimationInterval) return; // Already animating
+    
+    const faviconLink = document.querySelector('link[rel="icon"]');
+    if (!faviconLink) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    
+    const sleepingImg = new Image();
+    const awakeImg = new Image();
+    
+    sleepingImg.src = 'assets/favicon-sleeping.png';
+    awakeImg.src = 'assets/favicon.png';
+    
+    let imagesLoaded = 0;
+    const onImageLoad = () => {
+        imagesLoaded++;
+        if (imagesLoaded === 2) {
+            // Both images loaded - use simple interval-based animation
+            const holdDuration = 2000; // 2 seconds hold
+            const fadeDuration = 1000; // 1 second fade
+            const totalCycleDuration = holdDuration + fadeDuration + holdDuration + fadeDuration; // 6s total
+            const frameRate = 20; // 20fps - lower frame rate to reduce throttling issues
+            const frameInterval = 1000 / frameRate;
+            let startTime = Date.now();
+            
+            const renderFrame = () => {
+                const now = Date.now();
+                const elapsed = now - startTime;
+                const cyclePosition = elapsed % totalCycleDuration;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, 32, 32);
+                
+                if (cyclePosition < holdDuration) {
+                    // Phase 1: Hold on sleeping favicon
+                    ctx.globalAlpha = 1;
+                    ctx.drawImage(sleepingImg, 0, 0, 32, 32);
+                } else if (cyclePosition < holdDuration + fadeDuration) {
+                    // Phase 2: Fade from sleeping to awake
+                    const fadeProgress = (cyclePosition - holdDuration) / fadeDuration;
+                    
+                    ctx.globalAlpha = 1 - fadeProgress;
+                    ctx.drawImage(sleepingImg, 0, 0, 32, 32);
+                    
+                    ctx.globalAlpha = fadeProgress;
+                    ctx.drawImage(awakeImg, 0, 0, 32, 32);
+                } else if (cyclePosition < holdDuration + fadeDuration + holdDuration) {
+                    // Phase 3: Hold on awake favicon
+                    ctx.globalAlpha = 1;
+                    ctx.drawImage(awakeImg, 0, 0, 32, 32);
+                } else {
+                    // Phase 4: Fade from awake to sleeping
+                    const fadeProgress = (cyclePosition - holdDuration - fadeDuration - holdDuration) / fadeDuration;
+                    
+                    ctx.globalAlpha = 1 - fadeProgress;
+                    ctx.drawImage(awakeImg, 0, 0, 32, 32);
+                    
+                    ctx.globalAlpha = fadeProgress;
+                    ctx.drawImage(sleepingImg, 0, 0, 32, 32);
+                }
+                
+                // Update favicon
+                faviconLink.href = canvas.toDataURL('image/png');
+            };
+            
+            // Render first frame immediately
+            renderFrame();
+            
+            // Use setInterval for more predictable timing
+            // Browsers throttle intervals in background tabs, but timing stays more consistent than requestAnimationFrame
+            faviconAnimationInterval = setInterval(renderFrame, frameInterval);
+            
+            // Handle visibility change - reset timing when tab becomes visible to avoid jarring jumps
+            const handleVisibilityChange = () => {
+                if (!document.hidden && faviconAnimationInterval) {
+                    // Tab became visible - reset start time while maintaining position in cycle
+                    const now = Date.now();
+                    const elapsed = now - startTime;
+                    const cyclePosition = elapsed % totalCycleDuration;
+                    startTime = now - cyclePosition; // Continue where we left off
+                    renderFrame(); // Render immediately to avoid stale frame
+                }
+            };
+            
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+        }
+    };
+    
+    sleepingImg.onload = onImageLoad;
+    awakeImg.onload = onImageLoad;
+    
+    isInactive = true;
+}
+
+/**
+ * Stop the favicon animation and restore normal favicon
+ */
+function stopFaviconAnimation() {
+    if (faviconAnimationInterval) {
+        clearInterval(faviconAnimationInterval);
+        faviconAnimationInterval = null;
+    }
+    
+    const faviconLink = document.querySelector('link[rel="icon"]');
+    if (faviconLink) {
+        faviconLink.href = 'assets/favicon.png';
+    }
+    
+    isInactive = false;
 }
 
 
