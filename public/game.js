@@ -1486,7 +1486,7 @@ function updateIndicators() {
             wordsFoundLabel.style.color = 'var(--color-green)';
         }
     } else if (score >= dimThreshold) {
-        // At light-blue level
+        // At light-blue level (dim)
         circleColor = 'var(--color-light-blue)';
         nextThreshold = goodThreshold;
         nextThresholdName = 'bright';
@@ -1495,7 +1495,7 @@ function updateIndicators() {
             wordsFoundLabel.style.color = 'var(--color-light-blue)';
         }
     } else {
-        // At gray level (starting) - next threshold is bright
+        // Below dim level (shouldn't happen, but fallback to gray)
         circleColor = 'var(--color-gray)';
         nextThreshold = goodThreshold;
         nextThresholdName = 'bright';
