@@ -1495,13 +1495,13 @@ function updateIndicators() {
             wordsFoundLabel.style.color = 'var(--color-light-blue)';
         }
     } else {
-        // Below dim level (shouldn't happen, but fallback to gray)
-        circleColor = 'var(--color-gray)';
+        // At dim level (starting point / below good threshold)
+        circleColor = 'var(--color-light-blue)';
         nextThreshold = goodThreshold;
         nextThresholdName = 'bright';
         nextThresholdClass = 'green';
         if (wordsFoundLabel) {
-            wordsFoundLabel.style.color = 'var(--color-gray)';
+            wordsFoundLabel.style.color = 'var(--color-light-blue)';
         }
     }
     
