@@ -312,6 +312,14 @@ function getMsUntilNextMidnightCT() {
     return secondsUntilMidnightCT * 1000;
 }
 
+function getMsUntilNextMidnightLocal() {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow - now;
+}
+
 function keyToPattern(key) {
     // key format: "len:1,2,3"
     const parts = key.split(':');
@@ -507,8 +515,8 @@ function scheduleRotation() {
     if (rotationTimeoutId) clearTimeout(rotationTimeoutId);
     if (rotationIntervalId) clearInterval(rotationIntervalId);
     
-    const msUntilMidnight = getMsUntilNextMidnightCT();
-    console.log(`Puzzle will rotate at next midnight (in ${(msUntilMidnight / 1000 / 3600).toFixed(2)} hours)`);
+    const msUntilMidnight = getMsUntilNextMidnightLocal();
+    console.log(`Puzzle will refresh at your local midnight (in ${(msUntilMidnight / 1000 / 3600).toFixed(2)} hours)`);
     
     rotationTimeoutId = setTimeout(() => {
         // Reload the page to get the new daily pattern
