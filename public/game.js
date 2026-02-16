@@ -1495,11 +1495,11 @@ function updateIndicators() {
             wordsFoundLabel.style.color = 'var(--color-light-blue)';
         }
     } else {
-        // At gray level (starting)
+        // At gray level (starting) - next threshold is bright
         circleColor = 'var(--color-gray)';
-        nextThreshold = dimThreshold;
-        nextThresholdName = 'dim';
-        nextThresholdClass = 'light-blue';
+        nextThreshold = goodThreshold;
+        nextThresholdName = 'bright';
+        nextThresholdClass = 'green';
         if (wordsFoundLabel) {
             wordsFoundLabel.style.color = 'var(--color-gray)';
         }
