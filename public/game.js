@@ -18,7 +18,6 @@ let expandedValidWords = new Set();  // Words from wordlist-20260215.txt (used f
 let foundWords = new Set();
 let score = 0;
 let totalWords = 0;
-let dimThreshold = 0;
 let goodThreshold = 0;
 let betterThreshold = 0;
 let bestThreshold = 0;
@@ -45,6 +44,7 @@ let lastActivityTime = Date.now();
 let bestModalShown = false;
 let faviconAnimationInterval = null;
 let isInactive = false;
+let previousThresholdLevel = null; // Track previous level for animation
 
 function trackEvent(eventName, properties) {
     if (typeof window === 'undefined') {
@@ -342,17 +342,13 @@ function applyPattern(patternArray, wordCount, thresholds) {
         goodThreshold = thresholds.good;
         betterThreshold = thresholds.better;
         bestThreshold = thresholds.best;
-        // Calculate dimThreshold as 10% of goodThreshold
-        dimThreshold = Math.ceil(goodThreshold * 0.10) || 0;
     } else {
         // Fallback for edge cases (shouldn't happen)
         if (totalWords === 2) {
-            dimThreshold = 0;
             goodThreshold = 1;
             betterThreshold = 2;
             bestThreshold = 2;
         } else {
-            dimThreshold = Math.ceil(totalWords * 0.03);
             goodThreshold = Math.ceil(totalWords * 0.30);
             betterThreshold = Math.ceil(totalWords * 0.50);
             bestThreshold = Math.ceil(totalWords * 0.80);
@@ -1447,63 +1443,70 @@ function updateIndicators() {
     
     // Determine current milestone level and next threshold
     let circleColor = 'var(--color-gray)';
-    let nextThreshold = dimThreshold;
-    let nextThresholdName = 'dim';
-    let nextThresholdClass = 'light-blue';
+    let currentLevel = 'gray'; // Default to starting level
+    let nextThreshold = goodThreshold;
+    let nextThresholdName = 'bright';
+    let nextThresholdClass = 'yellow';
     
     if (score >= bestThreshold) {
-        // At highest level (orange)
-        circleColor = 'var(--color-orange)';
+        // At highest level (light-blue)
+        circleColor = 'var(--color-light-blue)';
+        currentLevel = 'light-blue';
         nextThreshold = null; // No next level
         nextThresholdName = 'luminous';
-        nextThresholdClass = 'orange';
+        nextThresholdClass = 'light-blue';
         if (wordsFoundLabel) {
-            wordsFoundLabel.style.color = 'var(--color-orange)';
+            wordsFoundLabel.style.color = 'var(--color-light-blue)';
         }
     } else if (score >= betterThreshold) {
-        // At yellow level
-        circleColor = 'var(--color-yellow)';
-        nextThreshold = bestThreshold;
-        nextThresholdName = 'luminous';
-        nextThresholdClass = 'orange';
-        if (wordsFoundLabel) {
-            wordsFoundLabel.style.color = 'var(--color-yellow)';
-        }
-    } else if (score >= goodThreshold) {
         // At green level
         circleColor = 'var(--color-green)';
+        currentLevel = 'green';
+        nextThreshold = bestThreshold;
+        nextThresholdName = 'luminous';
+        nextThresholdClass = 'light-blue';
+        if (wordsFoundLabel) {
+            wordsFoundLabel.style.color = 'var(--color-green)';
+        }
+    } else if (score >= goodThreshold) {
+        // At yellow level
+        circleColor = 'var(--color-yellow)';
+        currentLevel = 'yellow';
         // If better and best thresholds are the same (e.g., 2-word puzzles), skip to best
         if (betterThreshold === bestThreshold) {
             nextThreshold = bestThreshold;
             nextThresholdName = 'luminous';
-            nextThresholdClass = 'orange';
+            nextThresholdClass = 'light-blue';
         } else {
             nextThreshold = betterThreshold;
             nextThresholdName = 'brilliant';
-            nextThresholdClass = 'yellow';
+            nextThresholdClass = 'green';
         }
         if (wordsFoundLabel) {
-            wordsFoundLabel.style.color = 'var(--color-green)';
-        }
-    } else if (score >= dimThreshold) {
-        // At light-blue level (dim)
-        circleColor = 'var(--color-light-blue)';
-        nextThreshold = goodThreshold;
-        nextThresholdName = 'bright';
-        nextThresholdClass = 'green';
-        if (wordsFoundLabel) {
-            wordsFoundLabel.style.color = 'var(--color-light-blue)';
+            wordsFoundLabel.style.color = 'var(--color-yellow)';
         }
     } else {
-        // At dim level (starting point / below good threshold)
-        circleColor = 'var(--color-light-blue)';
+        // At gray level (starting)
+        circleColor = 'var(--color-gray)';
+        currentLevel = 'gray';
         nextThreshold = goodThreshold;
         nextThresholdName = 'bright';
-        nextThresholdClass = 'green';
+        nextThresholdClass = 'yellow';
         if (wordsFoundLabel) {
-            wordsFoundLabel.style.color = 'var(--color-light-blue)';
+            wordsFoundLabel.style.color = 'var(--color-gray)';
         }
     }
+    
+    // Check if threshold level changed - if so, trigger animation
+    if (previousThresholdLevel !== null && previousThresholdLevel !== currentLevel) {
+        if (scoreCircle) {
+            scoreCircle.classList.remove('threshold-reached');
+            // Trigger reflow to restart animation
+            void scoreCircle.offsetWidth;
+            scoreCircle.classList.add('threshold-reached');
+        }
+    }
+    previousThresholdLevel = currentLevel;
     
     // Update circle color
     if (scoreCircle) {
@@ -1534,7 +1537,7 @@ function updateIndicators() {
     if (score >= bestThreshold) {
         // At best level - show celebratory message
         if (nextLevelText) {
-            nextLevelText.innerHTML = `you're <span class="next-level-name orange">luminous</span>!`;
+            nextLevelText.innerHTML = `can you spy more?`;
         }
     } else {
         // Show remaining words to next level
@@ -1677,6 +1680,15 @@ function initializeInactivityTracking() {
     
     // Start inactivity timer
     resetInactivityTimer();
+    
+    // Set up animation end handler for circle
+    const scoreCircle = document.querySelector('.score-circle');
+    
+    if (scoreCircle) {
+        scoreCircle.addEventListener('animationend', () => {
+            scoreCircle.classList.remove('threshold-reached');
+        });
+    }
 }
 
 /**

@@ -596,10 +596,6 @@ button:active {
     color: var(--color-light-blue);
 }
 
-.next-level-name.orange {
-    color: var(--color-orange);
-}
-
 .words-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
@@ -842,6 +838,23 @@ hr{
     animation: best-modal-fade 0.25s ease-out both;
 }
 
+/* Preview mode - make modal always visible for testing */
+.best-modal.best-modal-preview {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.best-modal.best-modal-preview .best-modal-content {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation: best-modal-pop 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.best-modal.best-modal-preview .best-modal-image {
+    animation: best-modal-wave 0.7s ease-out both, pulse-grow 2s ease-in-out 0.7s infinite;
+    filter: drop-shadow(0 0 8px rgba(116, 210, 231, 0.6));
+}
+
 
 .best-modal-content {
     text-align: center;
@@ -874,10 +887,12 @@ hr{
     transform: none;
     transform-origin: center;
     opacity: 1;
+    filter: drop-shadow(0 0 0 rgba(116, 210, 231, 0));
 }
 
 .best-modal.open .best-modal-image {
-    animation: best-modal-wave 0.7s ease-out both, float-up-down 4s ease-in-out 0.7s infinite;
+    animation: best-modal-wave 0.7s ease-out both, pulse-grow 2s ease-in-out 0.7s infinite;
+    filter: drop-shadow(0 0 8px rgba(116, 210, 231, 0.6));
 }
 
 .best-modal-text {
@@ -1050,6 +1065,15 @@ hr{
     }
 }
 
+@keyframes pulse-grow {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.04);
+    }
+}
+
 @keyframes persistent-btn-fade-in {
     from {
         opacity: 0;
@@ -1098,4 +1122,21 @@ hr{
 .is-mobile .clear-btn,
 .is-mobile .submit-btn {
     display: none !important;
+}
+
+/* Threshold reached animations */
+@keyframes threshold-bounce {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.12);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.score-circle.threshold-reached {
+    animation: threshold-bounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
