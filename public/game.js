@@ -1545,7 +1545,7 @@ function updateIndicators() {
     if (score >= bestThreshold) {
         // At best level - show celebratory message
         if (nextLevelText) {
-            nextLevelText.innerHTML = `can you spy more?`;
+            nextLevelText.innerHTML = `you're <span class="next-level-name light-blue">luminous</span>!`;
         }
     } else {
         // Show remaining words to next level
