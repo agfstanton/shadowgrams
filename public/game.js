@@ -416,7 +416,7 @@ async function getRecoloredSVG(originalSrc) {
 }
 
 function updateTypedDisplay() {
-    const tiles = document.querySelectorAll('.tiles-display .tile');
+    const tiles = document.querySelectorAll('.puzzle-display .tile');
     tiles.forEach((tile, idx) => {
         const span = tile.querySelector('.tile-char');
         if (span) span.textContent = typedChars[idx] || '';
@@ -541,7 +541,7 @@ function pickAndApplyRandomPattern() {
  * Render the tile display based on current pattern
  */
 function renderTiles() {
-    const tilesDisplay = document.querySelector('.tiles-display');
+    const tilesDisplay = document.querySelector('.puzzle-display');
     tilesDisplay.innerHTML = '';
     tileOriginalSrcs = []; // Reset original sources
     
@@ -578,7 +578,7 @@ function renderTiles() {
  * Wait for all tile images to load, calculate sizes, then make container visible
  */
 function waitForImagesAndShowContainer() {
-    const tilesDisplay = document.querySelector('.tiles-display');
+    const tilesDisplay = document.querySelector('.puzzle-display');
     const gameContainer = document.querySelector('.game-container');
     if (!tilesDisplay || !gameContainer) return;
     
@@ -636,10 +636,10 @@ function waitForImagesAndShowContainer() {
 }
 
 /**
- * Update tile font size based on tiles-display height (for window resize events)
+ * Update tile font size based on puzzle-display height (for window resize events)
  */
 function updateTileFontSize() {
-    const tilesDisplay = document.querySelector('.tiles-display');
+    const tilesDisplay = document.querySelector('.puzzle-display');
     if (!tilesDisplay) return;
     
     const displayHeight = tilesDisplay.offsetHeight;
@@ -653,7 +653,7 @@ function updateTileFontSize() {
  * Update tile gap based on actual rendered tile height (for window resize events)
  */
 function updateTileGap() {
-    const tilesDisplay = document.querySelector('.tiles-display');
+    const tilesDisplay = document.querySelector('.puzzle-display');
     if (!tilesDisplay) return;
     
     const firstTileImg = tilesDisplay.querySelector('.tile img');
@@ -945,7 +945,7 @@ function setupMobileInput() {
     mobileInput.dataset.mobileEnabled = 'true';
     
     // Focus on tiles display click
-    const tilesDisplay = document.querySelector('.tiles-display');
+    const tilesDisplay = document.querySelector('.puzzle-display');
     if (tilesDisplay) {
         tilesDisplay.addEventListener('click', () => {
             mobileInput.focus();

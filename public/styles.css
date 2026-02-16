@@ -184,7 +184,7 @@ body {
     transition: opacity 0.3s ease;
 }
 
-.tiles-wrap {
+.puzzle {
     display: flex;
     flex-direction: column;
     margin-bottom: 0;
@@ -222,7 +222,7 @@ body {
     position: relative;
 }
 
-.tiles-display {
+.puzzle-display {
     display: flex;
     justify-content: center;
     gap: var(--tile-gap, calc(120px / 39));
@@ -538,11 +538,10 @@ button:active {
 }
 
 .score-circle {
-    width: 45px;
-    height: 45px;
-    margin-left: -10px;
-    margin-top: -10px;
-    border-radius: 0 50% 50% 50%;
+    width: 54px;
+    height: 54px;
+    margin-left: -16px;
+    margin-top: -16px;
     background: transparent;
     display: flex;
     align-items: center;
@@ -1142,7 +1141,7 @@ hr{
         margin-left: 0;
     }
 
-    .tiles-display {
+    .puzzle-display {
         gap: var(--tile-gap, calc(100px / 39));
     }
 
