@@ -365,9 +365,9 @@ function applyPattern(patternArray, wordCount, thresholds) {
             betterThreshold = 2;
             bestThreshold = 2;
         } else {
-            goodThreshold = Math.ceil(totalWords * 0.30);
+            goodThreshold = Math.ceil(totalWords * 0.25);
             betterThreshold = Math.ceil(totalWords * 0.50);
-            bestThreshold = Math.ceil(totalWords * 0.80);
+            bestThreshold = Math.ceil(totalWords * 0.75);
         }
     }
 

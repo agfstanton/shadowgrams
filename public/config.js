@@ -11,9 +11,9 @@ const TILES = {
 
 // Scoring thresholds
 const SCORE_THRESHOLDS = {
-    good: 0.30,      // 30%
+    good: 0.25,      // 25%
     better: 0.50,    // 50%
-    best: 0.80       // 80%
+    best: 0.75       // 75%
 };
 
 // LocalStorage keys
