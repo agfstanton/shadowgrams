@@ -80,6 +80,7 @@ body {
     width: calc(100% - 40px);
 }
 
+
 .logo {
     height: 40px;
     width: auto;
@@ -682,8 +683,8 @@ button:active {
 }
 
 .modal.open {
-    align-items: flex-start;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
     opacity: 1;
     pointer-events: auto;
 }
@@ -705,8 +706,8 @@ button:active {
     position: relative;
     margin-bottom: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    opacity: 0;
-    transition: opacity 0.15s ease;
+    opacity: 1;
+    transition: none;
 }
 
 .modal-footer {

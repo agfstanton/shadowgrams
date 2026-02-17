@@ -23,7 +23,9 @@ const STORAGE_KEYS = {
     foundWords: 'shadowgrams_found_words',
     bestModal: 'shadowgrams_best_modal_shown',
     typeToBegin: 'shadowgrams_type_to_begin_completed',
-    userId: 'shadowgrams_user_id'
+    userId: 'shadowgrams_user_id',
+    streak: 'shadowgrams_streak_data',
+    streakHistory: 'shadowgrams_streak_history'
 };
 
 // File paths
@@ -46,6 +48,14 @@ const GAME_CONFIG = {
     minWordLength: 3,
     maxWordLength: 6,
     minPatternWords: 4
+};
+
+// Level information
+const LEVEL_INFO = {
+    0: { name: 'dull', key: 'gray', display: 'Dull' },
+    1: { name: 'bright', key: 'yellow', display: 'Bright' },
+    2: { name: 'luminous', key: 'green', display: 'Luminous' },
+    3: { name: 'brilliant', key: 'light-blue', display: 'Brilliant' }
 };
 
 // API settings

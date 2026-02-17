@@ -100,6 +100,7 @@ function loadFoundWords() {
                     }
                 });
                 updateScore();
+                
             }
         }
     } catch(e) {
@@ -836,7 +837,6 @@ async function init() {
         bestCloseBtn.addEventListener('click', hideBestModal);
     }
 
-    // Info modal handling
     const infoBtn = document.getElementById('infoBtn');
     const infoModal = document.getElementById('infoModal');
     const infoIcon = infoBtn?.querySelector('.icon-svg');
@@ -844,6 +844,7 @@ async function init() {
     const logoContainer = document.querySelector('.logo-container');
     const copyright = document.querySelector('.copyright');
 
+    // Info modal handling
     if (infoBtn && infoModal && infoIcon) {
         infoBtn.addEventListener('click', () => {
             const isOpen = infoModal.classList.contains('open');
@@ -858,7 +859,7 @@ async function init() {
                 refocusMobileInput();
             } else {
                 // Open modal
-                setModalHeight();
+                setModalHeight(infoModal);
                 updateTileGap();
                 infoModal.classList.add('open');
                 if (logo) logo.classList.add('white');
@@ -888,9 +889,9 @@ async function init() {
     }
 
     // Function to set modal height to match game container
-    function setModalHeight() {
+    function setModalHeight(modalElement) {
         const gameContainer = document.querySelector('.game-container');
-        const modalContent = document.querySelector('.modal-content');
+        const modalContent = modalElement?.querySelector('.modal-content');
         
         if (gameContainer && modalContent) {
             const rect = gameContainer.getBoundingClientRect();
@@ -909,7 +910,7 @@ async function init() {
     window.addEventListener('resize', () => {
         const infoModal = document.getElementById('infoModal');
         if (infoModal && infoModal.classList.contains('open')) {
-            setModalHeight();
+            setModalHeight(infoModal);
         }
     });
 
@@ -1106,6 +1107,7 @@ function submitWord() {
         }
         addWordToGrid(word);
         saveFoundWords();
+        
         showPlusOneMessage();
 
         trackEvent('word_submitted', {
@@ -1558,7 +1560,7 @@ function updateIndicators() {
         circleColor = 'var(--color-light-blue)';
         currentLevel = 'light-blue';
         nextThreshold = null; // No next level
-        nextThresholdName = 'luminous';
+        nextThresholdName = 'brilliant';
         nextThresholdClass = 'light-blue';
         if (wordsFoundLabel) {
             wordsFoundLabel.style.color = 'var(--color-light-blue)';
@@ -1568,7 +1570,7 @@ function updateIndicators() {
         circleColor = 'var(--color-green)';
         currentLevel = 'green';
         nextThreshold = bestThreshold;
-        nextThresholdName = 'luminous';
+        nextThresholdName = 'brilliant';
         nextThresholdClass = 'light-blue';
         if (wordsFoundLabel) {
             wordsFoundLabel.style.color = 'var(--color-green)';
@@ -1580,11 +1582,11 @@ function updateIndicators() {
         // If better and best thresholds are the same (e.g., 2-word puzzles), skip to best
         if (betterThreshold === bestThreshold) {
             nextThreshold = bestThreshold;
-            nextThresholdName = 'luminous';
+            nextThresholdName = 'brilliant';
             nextThresholdClass = 'light-blue';
         } else {
             nextThreshold = betterThreshold;
-            nextThresholdName = 'brilliant';
+            nextThresholdName = 'luminous';
             nextThresholdClass = 'green';
         }
         if (wordsFoundLabel) {
@@ -1637,31 +1639,18 @@ function updateIndicators() {
         scoreCircle.style.background = circleColor;
     }
     
-    // Show/hide persistent share button based on best threshold
+    // Persistent share button is always visible in the words area
     const persistentShareBtn = document.getElementById('persistentShareBtn');
     if (persistentShareBtn) {
-        const bestModal = document.getElementById('bestModal');
-        const bestModalOpen = bestModal && bestModal.classList.contains('open');
-        if (score >= bestThreshold) {
-            persistentShareBtn.style.display = 'flex';
-            // If modal is open, hide the button (should be handled in showBestModal)
-            if (bestModalOpen) {
-                persistentShareBtn.style.display = 'none';
-            } else {
-                // Remove fade-in if present (only fade in once after modal closes)
-                persistentShareBtn.classList.remove('fade-in');
-            }
-        } else {
-            persistentShareBtn.style.display = 'none';
-            persistentShareBtn.classList.remove('fade-in');
-        }
+        persistentShareBtn.style.display = 'flex';
+        persistentShareBtn.classList.remove('fade-in');
     }
     
     // Update next level text based on achievement status
     if (score >= bestThreshold) {
         // At best level - show celebratory message
         if (nextLevelText) {
-            nextLevelText.innerHTML = `you're <span class="next-level-name light-blue">luminous</span>!`;
+            nextLevelText.innerHTML = `you're <span class="next-level-name light-blue">brilliant</span>!`;
         }
     } else {
         // Show remaining words to next level
@@ -1709,11 +1698,6 @@ function showBestModal() {
         });
     }
     
-    // Hide persistent share button when best modal is shown
-    if (persistentShareBtn) {
-        persistentShareBtn.style.display = 'none';
-    }
-    
     // Dismiss keyboard on mobile
     const mobileInput = document.getElementById('mobileInput');
     if (mobileInput) {
@@ -1754,17 +1738,6 @@ function hideBestModal() {
     
     if (bestModal) {
         bestModal.classList.remove('open');
-    }
-    
-    // Fade in persistent share button when modal dismissed
-    if (persistentShareBtn) {
-        persistentShareBtn.style.display = 'flex';
-        // Only add fade-in if not already visible (and not already faded in)
-        if (!persistentShareBtn.classList.contains('fade-in')) {
-            // Trigger reflow to ensure CSS transition plays
-            persistentShareBtn.offsetHeight;
-            persistentShareBtn.classList.add('fade-in');
-        }
     }
     
     refocusMobileInput();
