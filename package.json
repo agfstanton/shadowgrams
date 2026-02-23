@@ -1,8 +1,9 @@
 {
-  "name": "files(2)",
+  "name": "shadowgrams",
   "version": "1.0.0",
-  "description": "",
+  "description": "Shadowgrams - Daily puzzle game",
   "main": "src/server.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node src/server.js",
@@ -11,7 +12,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1"
