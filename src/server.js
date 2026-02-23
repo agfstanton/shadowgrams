@@ -28,7 +28,7 @@ try {
 }
 
 const app = express();
-const PORT = API_CONFIG.port || 3000;
+const PORT = process.env.PORT || API_CONFIG.port || 3000;
 const LOGS_FILE = path.join(__dirname, '../data/puzzle-logs.json');
 
 app.use((req, res, next) => {
@@ -145,7 +145,7 @@ app.get('/api/puzzle/today', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log('Serving Shade and Shadowgrams');
 });
